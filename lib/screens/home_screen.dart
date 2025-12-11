@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/firestore_service.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final FirestoreService _dataService = FirestoreService();
-  
+
   DateTime _currentWeekStart = DateTime.now();
   List<Problem> _problems = [];
   Set<String> _solvedIds = {};
@@ -32,8 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // Initialize to the Monday of the current week, assuming KST (UTC+9)
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
     _currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
-    _currentWeekStart = DateTime(_currentWeekStart.year, _currentWeekStart.month, _currentWeekStart.day);
-    
+    _currentWeekStart =
+        DateTime(_currentWeekStart.year, _currentWeekStart.month, _currentWeekStart.day);
+
     _loadData();
   }
 
@@ -88,9 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openProblem(Problem problem) async {
     // For now, we'll use a mock user ID.
     final userId = 'mock_user_id';
-    
+
     bool isRevealed = _revealedIds.contains(problem.id);
-    
+
     if (isRevealed) {
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -109,21 +111,40 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String _getPlatform() {
+    if (kIsWeb) {
+      return 'Web';
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'Android';
+      case TargetPlatform.iOS:
+        return 'iOS';
+      case TargetPlatform.macOS:
+        return 'macOS';
+      case TargetPlatform.windows:
+        return 'Windows';
+      case TargetPlatform.linux:
+        return 'Linux';
+      case TargetPlatform.fuchsia:
+        return 'Fuchsia';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    
+
     return Scaffold(
       appBar: WorldMathAppBar(
         title: '${_currentWeekStart.year}년 ${_getWeekNumber(_currentWeekStart)}주차',
         titleWidget: LayoutBuilder(
           builder: (context, constraints) {
-            // Check available width for the title area
-            // We need enough space for Text (~150px) + Controls (~130px) + Spacing
             final showText = constraints.maxWidth > 300;
-
             return Row(
-              mainAxisAlignment: showText ? MainAxisAlignment.start : MainAxisAlignment.center,
+              mainAxisAlignment: showText
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.center,
               children: [
                 if (showText) ...[
                   const SizedBox(width: 8),
@@ -133,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 4.0), // Adjust alignment
+                            padding: const EdgeInsets.only(top: 4.0),
                             child: Text(
                               '${_currentWeekStart.year}',
                               style: TextStyle(
@@ -164,25 +185,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: BoxDecoration(
                       color: Colors.grey.withAlpha((255 * 0.08).toInt()),
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.grey.withAlpha((255 * 0.1).toInt())),
+                      border: Border.all(
+                          color: Colors.grey.withAlpha((255 * 0.1).toInt())),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildNavArrow(Icons.chevron_left_rounded, () => _changeWeek(-1)),
+                        _buildNavArrow(Icons.chevron_left_rounded,
+                            () => _changeWeek(-1)),
                         const SizedBox(width: 2),
                         Flexible(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 72),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: MiniCalendarIcon(date: _currentWeekStart, size: 72),
+                              child: MiniCalendarIcon(
+                                  date: _currentWeekStart, size: 72),
                             ),
                           ),
                         ),
                         const SizedBox(width: 2),
-                        _buildNavArrow(Icons.chevron_right_rounded, () => _changeWeek(1)),
+                        _buildNavArrow(Icons.chevron_right_rounded,
+                            () => _changeWeek(1)),
                       ],
                     ),
                   ),
@@ -192,101 +218,147 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _problems.isEmpty
-              ? const Center(child: Text("등록된 문제가 없습니다."))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _problems.length,
-                  itemBuilder: (context, index) {
-                    final problem = _problems[index];
-                    // Lock logic: Lock if problem date is in the future relative to REAL time
-                    // But allow viewing past weeks.
-                    // If we are viewing a past week, all should be unlocked (unless future relative to now).
-                    // If we are viewing future week, all locked.
-                    
-                    // Simple check: is problem.date > now?
-                    // Note: problem.date might have time 00:00.
-                    // If today is Mon, Mon problem (00:00) is <= now.
-                    final isLocked = problem.date.isAfter(now) && !isSameDay(problem.date, now);
-                    final isSolved = _solvedIds.contains(problem.id);
-                    
-                    final weekDays = ['월', '화', '수', '목', '금', '토', '일'];
-                    final koreanDay = weekDays[problem.date.weekday - 1];
+      body: Stack(
+        children: [
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _problems.isEmpty
+                  ? const Center(child: Text("등록된 문제가 없습니다."))
+                  : ListView.builder(
+                      padding:
+                          const EdgeInsets.fromLTRB(16, 16, 16, 150), // Add padding to bottom
+                      itemCount: _problems.length,
+                      itemBuilder: (context, index) {
+                        final problem = _problems[index];
+                        final isLocked = problem.date.isAfter(now) &&
+                            !isSameDay(problem.date, now);
+                        final isSolved = _solvedIds.contains(problem.id);
+                        final weekDays = ['월', '화', '수', '목', '금', '토', '일'];
+                        final koreanDay =
+                            weekDays[problem.date.weekday - 1];
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnimatedCard(
-                        index: index,
-                        color: isLocked ? Colors.grey[200] : Colors.white,
-                        onTap: isLocked ? () {
-                          CustomSnackbar.show(
-                            context,
-                            message: '아직 공개되지 않은 문제입니다.',
-                            type: SnackbarType.warning,
-                          );
-                        } : () => _openProblem(problem),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          leading: Hero(
-                            tag: 'problem_${problem.id}',
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: isLocked ? Colors.grey : (isSolved ? AppTheme.primaryColor : Colors.white),
-                                border: Border.all(
-                                  color: isLocked ? Colors.grey : AppTheme.primaryColor,
-                                  width: 2,
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: AnimatedCard(
+                            index: index,
+                            color:
+                                isLocked ? Colors.grey[200] : Colors.white,
+                            onTap: isLocked
+                                ? () {
+                                    CustomSnackbar.show(
+                                      context,
+                                      message: '아직 공개되지 않은 문제입니다.',
+                                      type: SnackbarType.warning,
+                                    );
+                                  }
+                                : () => _openProblem(problem),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              leading: Hero(
+                                tag: 'problem_${problem.id}',
+                                child: Container(
+                                  width: 48,
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isLocked
+                                        ? Colors.grey
+                                        : (isSolved
+                                            ? AppTheme.primaryColor
+                                            : Colors.white),
+                                    border: Border.all(
+                                      color: isLocked
+                                          ? Colors.grey
+                                          : AppTheme.primaryColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: isLocked
+                                        ? const Icon(Icons.lock,
+                                            size: 20, color: Colors.white)
+                                        : (isSolved
+                                            ? const Icon(Icons.check,
+                                                size: 20,
+                                                color: Colors.white)
+                                            : Text(
+                                                koreanDay,
+                                                style: const TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.bold,
+                                                  color:
+                                                      AppTheme.primaryColor,
+                                                ),
+                                              )),
+                                  ),
                                 ),
                               ),
-                              child: Center(
-                                child: isLocked
-                                  ? const Icon(Icons.lock, size: 20, color: Colors.white)
-                                  : (isSolved
-                                      ? const Icon(Icons.check, size: 20, color: Colors.white)
-                                      : Text(
-                                          koreanDay,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppTheme.primaryColor,
-                                          ),
-                                        )),
+                              title: Text(
+                                problem.title,
+                                style: TextStyle(
+                                  color: isLocked
+                                      ? Colors.grey
+                                      : AppTheme.textColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
                               ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  DateFormat('yyyy.MM.dd')
+                                      .format(problem.date),
+                                  style: TextStyle(
+                                    color: isLocked
+                                        ? Colors.grey
+                                        : Colors.grey[600],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              trailing: isLocked
+                                  ? null
+                                  : Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: AppTheme.primaryColor
+                                          .withAlpha((255 * 0.7).toInt()),
+                                    ),
                             ),
                           ),
-                          title: Text(
-                            problem.title,
-                            style: TextStyle(
-                              color: isLocked ? Colors.grey : AppTheme.textColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              ), 
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              DateFormat('yyyy.MM.dd').format(problem.date),
-                              style: TextStyle(
-                                color: isLocked ? Colors.grey : Colors.grey[600],
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                          trailing: isLocked
-                            ? null
-                            : Icon(
-                                Icons.arrow_forward_ios,
-                                size: 16,
-                                color: AppTheme.primaryColor.withAlpha((255 * 0.7).toInt()),
-                              ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: Colors.black.withOpacity(0.8),
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('--- DEBUG INFO ---',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
+                  Text('Platform: ${_getPlatform()}',
+                      style: const TextStyle(color: Colors.white)),
+                  Text('Week Start (KST): $_currentWeekStart',
+                      style: const TextStyle(color: Colors.white)),
+                  Text('Problems Loaded: ${_problems.length}',
+                      style: const TextStyle(color: Colors.white)),
+                  Text('Problem IDs: ${_problems.map((p) => p.id).toList()}',
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 10)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
