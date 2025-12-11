@@ -18,7 +18,7 @@ class FirestoreService {
 
     // 캐시된 학교 목록이 없으면 Firestore에서 가져옵니다.
     if (_allSchools.isEmpty) {
-      final snapshot = await _db.collection('schools').get();
+      final snapshot = await _db.collection('schools').get(const GetOptions(source: Source.server));
       _allSchools = snapshot.docs.map((doc) => School.fromMap(doc.data(), doc.id)).toList();
     }
 
@@ -598,7 +598,7 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
         .where('date', isGreaterThanOrEqualTo: startOfWeek.toIso8601String().split('T')[0])
         .where('date', isLessThan: endOfWeek.toIso8601String().split('T')[0])
         .orderBy('date', descending: false)
-        .get();
+        .get(const GetOptions(source: Source.server));
 
     final problems = snapshot.docs.map((doc) => Problem.fromMap(doc.data())).toList();
     print('Returning ${problems.length} problems from Firebase Firestore');
@@ -606,7 +606,7 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
   }
   
   Future<bool> hasRevealed(String userId, String problemId) async {
-    final doc = await _db.collection('users').doc(userId).collection('revealed_problems').doc(problemId).get();
+    final doc = await _db.collection('users').doc(userId).collection('revealed_problems').doc(problemId).get(const GetOptions(source: Source.server));
     return doc.exists;
   }
 
@@ -657,7 +657,7 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
   Future<Problem?> getProblemById(String problemId) async {
     print('Trying to load problem $problemId from Firebase Firestore...');
 
-    final doc = await _db.collection('problems').doc(problemId).get();
+    final doc = await _db.collection('problems').doc(problemId).get(const GetOptions(source: Source.server));
     if (doc.exists) {
       final problem = Problem.fromMap(doc.data()!);
       print('Loaded $problemId from Firestore: economicInsightData = ${problem.economicInsightData != null ? "YES" : "NO"}');
