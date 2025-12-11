@@ -29,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize to the Monday of the current week
-    final now = DateTime.now();
+    // Initialize to the Monday of the current week, assuming KST (UTC+9)
+    final now = DateTime.now().toUtc().add(const Duration(hours: 9));
     _currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
     _currentWeekStart = DateTime(_currentWeekStart.year, _currentWeekStart.month, _currentWeekStart.day);
     
