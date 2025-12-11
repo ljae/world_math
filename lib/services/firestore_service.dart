@@ -591,47 +591,17 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
   Future<List<Problem>> getProblemsByWeek(DateTime startOfWeek) async {
     final endOfWeek = startOfWeek.add(const Duration(days: 7));
 
-    // ALWAYS try to load from Firebase Firestore first
     print('Loading problems for week $startOfWeek from Firebase Firestore...');
 
-    try {
-      final snapshot = await _db
-          .collection('problems')
-          .where('date', isGreaterThanOrEqualTo: startOfWeek.toIso8601String().split('T')[0])
-          .where('date', isLessThan: endOfWeek.toIso8601String().split('T')[0])
-          .orderBy('date', descending: false)
-          .get();
+    final snapshot = await _db
+        .collection('problems')
+        .where('date', isGreaterThanOrEqualTo: startOfWeek.toIso8601String().split('T')[0])
+        .where('date', isLessThan: endOfWeek.toIso8601String().split('T')[0])
+        .orderBy('date', descending: false)
+        .get();
 
-      if (snapshot.docs.isNotEmpty) {
-        final problems = snapshot.docs.map((doc) => Problem.fromMap(doc.data())).toList();
-        print('Returning ${problems.length} problems from Firebase Firestore');
-        return problems;
-      }
-    } catch (e) {
-      print('Error loading from Firestore: $e');
-    }
-
-    // If Firestore fails or has no data, fall back to JSON files
-    print('No data in Firestore, falling back to JSON files...');
-    final jsonLoader = JsonProblemLoader();
-    final problems = <Problem>[];
-
-    // Generate problem IDs for the week (format: p_YYYYMMDD)
-    for (int i = 0; i < 7; i++) {
-      final date = startOfWeek.add(Duration(days: i));
-      final problemId = 'p_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
-
-      try {
-        final problem = await jsonLoader.loadProblem(problemId);
-        if (problem != null) {
-          problems.add(problem);
-          print('Loaded $problemId from JSON: economicInsightData = ${problem.economicInsightData != null ? "YES" : "NO"}');
-        }
-      } catch (e) {
-        print('Could not load problem $problemId from JSON: $e');
-      }
-    }
-
+    final problems = snapshot.docs.map((doc) => Problem.fromMap(doc.data())).toList();
+    print('Returning ${problems.length} problems from Firebase Firestore');
     return problems;
   }
   
@@ -685,34 +655,17 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
   }
 
   Future<Problem?> getProblemById(String problemId) async {
-    // ALWAYS try Firebase Firestore first
     print('Trying to load problem $problemId from Firebase Firestore...');
 
-    try {
-      final doc = await _db.collection('problems').doc(problemId).get();
-      if (doc.exists) {
-        final problem = Problem.fromMap(doc.data()!);
-        print('Loaded $problemId from Firestore: economicInsightData = ${problem.economicInsightData != null ? "YES" : "NO"}');
-        return problem;
-      }
-    } catch (e) {
-      print('Error loading $problemId from Firestore: $e');
+    final doc = await _db.collection('problems').doc(problemId).get();
+    if (doc.exists) {
+      final problem = Problem.fromMap(doc.data()!);
+      print('Loaded $problemId from Firestore: economicInsightData = ${problem.economicInsightData != null ? "YES" : "NO"}');
+      return problem;
+    } else {
+      print('Problem $problemId not found in Firestore.');
+      return null;
     }
-
-    // If Firestore fails or doesn't have the data, fall back to JSON file
-    print('Problem $problemId not found in Firestore, trying JSON file...');
-    final jsonLoader = JsonProblemLoader();
-    try {
-      final problem = await jsonLoader.loadProblem(problemId);
-      if (problem != null) {
-        print('Loaded $problemId from JSON: economicInsightData = ${problem.economicInsightData != null ? "YES" : "NO"}');
-        return problem;
-      }
-    } catch (e) {
-      print('Could not load $problemId from JSON: $e');
-    }
-
-    return null;
   }
 
   Future<void> updateUser(User user) async {
