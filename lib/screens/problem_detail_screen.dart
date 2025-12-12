@@ -1087,9 +1087,9 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.red.withAlpha(100), // BRIGHT RED to make it obvious!
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
+        border: Border.all(color: Colors.red, width: 5),
       ),
       child: Column(
         children: [
