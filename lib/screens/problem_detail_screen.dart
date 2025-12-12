@@ -1093,6 +1093,25 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       ),
       child: Column(
         children: [
+          // DEBUG: Show raw metadata values
+          Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.orange.withAlpha(30),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('DEBUG - Raw Values:', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                Text('gradeLevel: "${widget.problem.gradeLevel}"', style: TextStyle(fontSize: 10)),
+                Text('difficulty: "${widget.problem.difficulty}"', style: TextStyle(fontSize: 10)),
+                Text('mathTopic: "${widget.problem.mathTopic}"', style: TextStyle(fontSize: 10)),
+                Text('economicTheme: "${widget.problem.economicTheme}"', style: TextStyle(fontSize: 10)),
+              ],
+            ),
+          ),
           Row(
             children: [
               _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
