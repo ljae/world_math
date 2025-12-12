@@ -88,6 +88,12 @@ class Problem {
   }
 
   factory Problem.fromMap(Map<String, dynamic> map) {
+    // Debug: Print raw map data to diagnose web vs local differences
+    print('Problem.fromMap called with keys: ${map.keys.toList()}');
+    if (map.containsKey('metadata')) {
+      print('Metadata keys: ${(map['metadata'] as Map?)?.keys.toList()}');
+    }
+
     // Helper to safely extract nested values
     dynamic getNested(List<String> keys) {
       dynamic current = map;
