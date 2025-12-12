@@ -54,7 +54,6 @@ flutter:
   assets:
     - assets/fonts/
     - assets/images/
-    - db/
 
   fonts:
     - family: Paperlogy
