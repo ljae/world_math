@@ -319,14 +319,29 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // TEST: Try Container with border instead of color
-        Container(
-          height: 100,
-          decoration: BoxDecoration(
-            color: Color(0xFFFF0000), // Explicit red
-            border: Border.all(color: Color(0xFF000000), width: 5),
+        // METADATA - moved here because it renders inside _buildProblemContent()
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('📚 학년: ${widget.problem.gradeLevel}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
+              const SizedBox(height: 8),
+              Text('⭐ 난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
+              const SizedBox(height: 8),
+              Text('🔢 수학 주제: ${widget.problem.mathTopic}',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
+              if (widget.problem.economicTheme.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text('💰 경제 테마: ${widget.problem.economicTheme}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
+              ],
+              const SizedBox(height: 16),
+              Container(height: 2, color: Colors.black87),
+            ],
           ),
-          child: Text('🔴 TEST BOX 🔴', style: TextStyle(fontSize: 40, color: Colors.white)),
         ),
 
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
@@ -1094,21 +1109,9 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // WEB FIX: Remove Container styling, use plain Column with Text
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('학년: ${widget.problem.gradeLevel}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Text('난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Text('수학 주제: ${widget.problem.mathTopic}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        if (widget.problem.economicTheme.isNotEmpty) ...[
-          SizedBox(height: 8),
-          Text('경제 테마: ${widget.problem.economicTheme}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        ],
-      ],
-    );
+    // MOVE metadata INSIDE _buildProblemContent() where it will render
+    // For now, return empty widget here
+    return SizedBox.shrink();
 
     /* ORIGINAL STYLED VERSION - DOESN'T WORK ON WEB
     return Container(
@@ -1209,10 +1212,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
         title: Text(
-          '🔴 TEST VERSION 12 🔴 ${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
+          '${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
           style: const TextStyle(
             fontFamily: 'Paperlogy',
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -1289,14 +1292,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
-                      // TEST: Try SizedBox with ColoredBox instead of Container
-                      SizedBox(
-                        height: 200,
-                        width: double.infinity,
-                        child: ColoredBox(color: Colors.red),
-                      ),
-
-                      // Metadata Row
+                      // Metadata Row (now empty - moved into _buildProblemContent)
                       _buildMetadataInfo(),
                       const SizedBox(height: 24),
 
@@ -1306,12 +1302,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
                       // Problem Content
                       _buildProblemContent(),
-
-                      // TEST: Simplest possible widget AFTER content
-                      Container(
-                        height: 200,
-                        color: Colors.green,
-                      ),
 
                       const SizedBox(height: 40),
 
