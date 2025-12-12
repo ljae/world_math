@@ -319,6 +319,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // TEST: Add colored box at START of problem content
+        Container(height: 100, color: Colors.purple),
+        Container(height: 100, color: Colors.orange),
+        SizedBox(height: 100, child: ColoredBox(color: Colors.yellow)),
+
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
           Center(
              child: Container(
