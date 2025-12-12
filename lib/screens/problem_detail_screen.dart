@@ -1084,21 +1084,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // ULTRA SIMPLE TEST - if this doesn't show, it's a rendering bug
+    // SIMPLEST POSSIBLE: Just a colored box
     return Container(
       height: 200,
-      width: double.infinity,
       color: Colors.red,
-      child: Center(
-        child: Text(
-          '🔴 METADATA SECTION HERE 🔴',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
     );
 
     /* ORIGINAL CODE - DISABLED FOR TESTING
@@ -1280,6 +1269,13 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
+                      // TEST: Try SizedBox with ColoredBox instead of Container
+                      SizedBox(
+                        height: 200,
+                        width: double.infinity,
+                        child: ColoredBox(color: Colors.red),
+                      ),
+
                       // Metadata Row
                       _buildMetadataInfo(),
                       const SizedBox(height: 24),
@@ -1291,21 +1287,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       // Problem Content
                       _buildProblemContent(),
 
-                      // TEST: Add the same red box AFTER content
+                      // TEST: Simplest possible widget AFTER content
                       Container(
                         height: 200,
-                        width: double.infinity,
                         color: Colors.green,
-                        child: Center(
-                          child: Text(
-                            '🟢 TEST WIDGET AFTER CONTENT 🟢',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ),
 
                       const SizedBox(height: 40),
