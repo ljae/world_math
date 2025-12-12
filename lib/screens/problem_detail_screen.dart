@@ -319,10 +319,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // TEST: Add colored box at START of problem content
-        Container(height: 100, color: Colors.purple),
-        Container(height: 100, color: Colors.orange),
-        SizedBox(height: 100, child: ColoredBox(color: Colors.yellow)),
+        // TEST: Try Container with border instead of color
+        Container(
+          height: 100,
+          decoration: BoxDecoration(
+            color: Color(0xFFFF0000), // Explicit red
+            border: Border.all(color: Color(0xFF000000), width: 5),
+          ),
+          child: Text('🔴 TEST BOX 🔴', style: TextStyle(fontSize: 40, color: Colors.white)),
+        ),
 
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
           Center(
@@ -1089,13 +1094,23 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // SIMPLEST POSSIBLE: Just a colored box
-    return Container(
-      height: 200,
-      color: Colors.red,
+    // WEB FIX: Remove Container styling, use plain Column with Text
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('학년: ${widget.problem.gradeLevel}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        Text('난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        Text('수학 주제: ${widget.problem.mathTopic}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        if (widget.problem.economicTheme.isNotEmpty) ...[
+          SizedBox(height: 8),
+          Text('경제 테마: ${widget.problem.economicTheme}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ],
+      ],
     );
 
-    /* ORIGINAL CODE - DISABLED FOR TESTING
+    /* ORIGINAL STYLED VERSION - DOESN'T WORK ON WEB
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
