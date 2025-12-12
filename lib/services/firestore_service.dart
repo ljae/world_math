@@ -589,14 +589,14 @@ $$2.622 - 1.931 = 0.691 \approx 0.7\text{억 달러}$$
   }
 
   Future<List<Problem>> getProblemsByWeek(DateTime startOfWeek) async {
-    final endOfWeek = startOfWeek.add(const Duration(days: 7));
-
-    print('Loading problems for week $startOfWeek from Firebase Firestore...');
+    final weekDayStrings = List.generate(
+        7,
+        (i) => startOfWeek.add(Duration(days: i)).toIso8601String().split('T')[0]
+    );
 
     final snapshot = await _db
         .collection('problems')
-        .where('date', isGreaterThanOrEqualTo: startOfWeek.toIso8601String().split('T')[0])
-        .where('date', isLessThan: endOfWeek.toIso8601String().split('T')[0])
+        .where('date', whereIn: weekDayStrings)
         .orderBy('date', descending: false)
         .get(const GetOptions(source: Source.server));
 
