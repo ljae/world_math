@@ -1209,10 +1209,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
         title: Text(
-          '${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
+          '🔴 TEST VERSION 12 🔴 ${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
           style: const TextStyle(
             fontFamily: 'Paperlogy',
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
