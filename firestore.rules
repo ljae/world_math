@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to problems collection
+    match /problems/{problemId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Allow public read access to schools collection (for login screen)
+    match /schools/{schoolId} {
+      allow read: if true;
+      allow write: if true;  // Temporary for seeding
+    }
+
+    // User data - allow all access for mock_user_id
+    match /users/{userId} {
+      allow read, write: if true;
+
+      // CORRECT subcollection name: revealed_problems (not revealed)
+      match /revealed_problems/{problemId} {
+        allow read, write: if true;
+      }
+
+      // CORRECT subcollection name: history (not solved)
+      match /history/{historyId} {
+        allow read, write: if true;
+      }
+    }
+  }
+}
