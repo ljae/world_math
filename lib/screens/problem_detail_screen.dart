@@ -319,31 +319,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // METADATA - moved here because it renders inside _buildProblemContent()
-        Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('📚 학년: ${widget.problem.gradeLevel}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
-              const SizedBox(height: 8),
-              Text('⭐ 난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
-              const SizedBox(height: 8),
-              Text('🔢 수학 주제: ${widget.problem.mathTopic}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
-              if (widget.problem.economicTheme.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('💰 경제 테마: ${widget.problem.economicTheme}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Paperlogy')),
-              ],
-              const SizedBox(height: 16),
-              Container(height: 2, color: Colors.black87),
-            ],
-          ),
-        ),
-
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
           Center(
              child: Container(
@@ -1109,11 +1084,52 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // MOVE metadata INSIDE _buildProblemContent() where it will render
-    // For now, return empty widget here
-    return SizedBox.shrink();
+    // ORIGINAL STYLED VERSION - restored
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
+              const SizedBox(width: 16),
+              _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetaItem('수학 주제', widget.problem.mathTopic, Icons.calculate),
+              ),
+            ],
+          ),
+          if (widget.problem.economicTheme.isNotEmpty) ...[
+            const SizedBox(height: 12),
+             Row(
+              children: [
+                Expanded(
+                  child: _buildMetaItem('경제 테마', widget.problem.economicTheme, Icons.monetization_on),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
 
-    /* ORIGINAL STYLED VERSION - DOESN'T WORK ON WEB
+    /* TEST CODE REMOVED
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withAlpha(100), // BRIGHT RED to make it obvious!
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
