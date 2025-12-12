@@ -1290,9 +1290,26 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
                       // Problem Content
                       _buildProblemContent(),
-                      
+
+                      // TEST: Add the same red box AFTER content
+                      Container(
+                        height: 200,
+                        width: double.infinity,
+                        color: Colors.green,
+                        child: Center(
+                          child: Text(
+                            '🟢 TEST WIDGET AFTER CONTENT 🟢',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 40),
-                      
+
                       // News Link
                       if (widget.problem.newsTitle != null) ...[
                         Container(height: 2, color: Colors.black26),
