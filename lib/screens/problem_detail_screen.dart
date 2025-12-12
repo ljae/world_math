@@ -1084,6 +1084,24 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
+    // ULTRA SIMPLE TEST - if this doesn't show, it's a rendering bug
+    return Container(
+      height: 200,
+      width: double.infinity,
+      color: Colors.red,
+      child: Center(
+        child: Text(
+          '🔴 METADATA SECTION HERE 🔴',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+
+    /* ORIGINAL CODE - DISABLED FOR TESTING
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1142,6 +1160,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         ],
       ),
     );
+    */ // END ORIGINAL CODE
   }
 
   Widget _buildMetaItem(String label, String value, IconData icon) {
