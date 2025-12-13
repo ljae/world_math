@@ -270,7 +270,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return result;
   }
 
-  Widget _buildMarkdown(String content) {
+  Widget _buildMarkdown(String content, {bool boldText = false}) {
     String processedContent = _sanitizeText(content);
 
     return MarkdownBody(
@@ -290,11 +290,12 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         ],
       ),
       styleSheet: MarkdownStyleSheet(
-        p: const TextStyle(
+        p: TextStyle(
           fontFamily: 'Paperlogy',
           fontSize: 17,
           height: 1.6,
           color: Colors.black87,
+          fontWeight: boldText ? FontWeight.bold : FontWeight.normal, // Bold for questions
         ),
         h1: const TextStyle(fontFamily: 'Paperlogy', fontSize: 24, fontWeight: FontWeight.bold),
         h2: const TextStyle(fontFamily: 'Paperlogy', fontSize: 22, fontWeight: FontWeight.bold),
@@ -347,7 +348,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
-              Expanded(child: _buildMarkdown('**${widget.problem.question.trim()}**')), // Bold with trim to fix markdown
+              Expanded(child: _buildMarkdown(widget.problem.question, boldText: true)), // Use boldText parameter
             ],
           ),
         ],
