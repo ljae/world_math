@@ -1084,13 +1084,16 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // WEB FIX: Use .shade instead of [] to prevent null in release builds
+    // WEB FIX: Use explicit Color values for release build compatibility
+    if (kDebugMode) {
+      print('_buildMetadataInfo called: grade=${widget.problem.gradeLevel}, difficulty=${widget.problem.difficulty}');
+    }
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: const Color(0xFFFAFAFA), // Grey 50 equivalent
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
+        border: Border.all(color: const Color(0x1F000000), width: 1), // Black12 equivalent
       ),
       child: Column(
         children: [
@@ -1196,15 +1199,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),
+        Icon(icon, size: 16, color: const Color(0xFF757575)), // Grey 600 explicit
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Paperlogy',
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey.shade600,
+            color: Color(0xFF757575), // Grey 600 explicit
           ),
         ),
         Flexible(
@@ -1308,8 +1311,18 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
-                      // Metadata Row (now empty - moved into _buildProblemContent)
+                      // TEST: Simple text before metadata
+                      const Text('>>> METADATA SHOULD APPEAR BELOW <<<',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+
+                      // Metadata Row
                       _buildMetadataInfo(),
+
+                      // TEST: Simple text after metadata
+                      const SizedBox(height: 8),
+                      const Text('>>> METADATA SHOULD APPEAR ABOVE <<<',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 24),
 
                       // Divider

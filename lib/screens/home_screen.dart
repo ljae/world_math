@@ -329,33 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: Colors.black.withOpacity(0.8),
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('--- DEBUG INFO ---',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold)),
-                  Text('Platform: ${_getPlatform()}',
-                      style: const TextStyle(color: Colors.white)),
-                  Text('Week Start (KST): $_currentWeekStart',
-                      style: const TextStyle(color: Colors.white)),
-                  Text('Problems Loaded: ${_problems.length}',
-                      style: const TextStyle(color: Colors.white)),
-                  Text('Problem IDs: ${_problems.map((p) => p.id).toList()}',
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 10)),
-                ],
-              ),
-            ),
-          ),
+
         ],
       ),
     );
