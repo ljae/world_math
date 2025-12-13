@@ -320,14 +320,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // DEBUG: Plain text without Container (Container doesn't render on web!)
-        Text('🔍 DEBUG: Q="${widget.problem.question.substring(0, widget.problem.question.length > 30 ? 30 : widget.problem.question.length)}..." isEmpty=${widget.problem.question.isEmpty}',
-          style: TextStyle(fontSize: 12, backgroundColor: Colors.yellow)),
-        Text('DEBUG: Choices=${widget.problem.choices.length}, Solution=${widget.problem.solutionData != null}',
-          style: TextStyle(fontSize: 12, backgroundColor: Colors.yellow)),
-        const SizedBox(height: 16),
-
-
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
           Center(
              child: Container(
@@ -349,6 +341,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         ],
         if (widget.problem.content.isNotEmpty)
           _buildMarkdown(widget.problem.content.replaceAll('[[IMAGE]]', '')), // Remove marker if present
+
+        // DEBUG: After content (where we know text renders)
+        const SizedBox(height: 16),
+        Text('━━━ DEBUG ━━━', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text('Question length: ${widget.problem.question.length}'),
+        Text('Question isEmpty: ${widget.problem.question.isEmpty}'),
+        Text('Question text: "${widget.problem.question}"'),
+        Text('Choices count: ${widget.problem.choices.length}'),
+        Text('━━━━━━━━━━━━━', style: TextStyle(fontSize: 20))
         
         if (widget.problem.question.isNotEmpty) ...[
           const SizedBox(height: 24),
