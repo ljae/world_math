@@ -1084,48 +1084,24 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // WEB FIX: Use explicit Color values for release build compatibility
-    if (kDebugMode) {
-      print('_buildMetadataInfo called: grade=${widget.problem.gradeLevel}, difficulty=${widget.problem.difficulty}');
-    }
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA), // Grey 50 equivalent
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0x1F000000), width: 1), // Black12 equivalent
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
-              const SizedBox(width: 16),
-              _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Divider(),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildMetaItem('수학 주제', widget.problem.mathTopic, Icons.calculate),
-              ),
-            ],
-          ),
-          if (widget.problem.economicTheme.isNotEmpty) ...[
-            const SizedBox(height: 12),
-             Row(
-              children: [
-                Expanded(
-                  child: _buildMetaItem('경제 테마', widget.problem.economicTheme, Icons.monetization_on),
-                ),
-              ],
-            ),
-          ],
+    // ULTRA SIMPLE: No Container, no decoration, just plain text
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('학년: ${widget.problem.gradeLevel}',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text('난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text('수학 주제: ${widget.problem.mathTopic}',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        if (widget.problem.economicTheme.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text('경제 테마: ${widget.problem.economicTheme}',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
-      ),
+      ],
     );
 
     /* TEST CODE REMOVED
