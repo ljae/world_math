@@ -135,16 +135,20 @@ class Problem {
     List<dynamic> choices = [];
     String correctAnswer = '';
 
+    print('DEBUG: problemData.questions type: ${problemData['questions'].runtimeType}');
     if (problemData['questions'] is List && (problemData['questions'] as List).isNotEmpty) {
       final firstQuestion = problemData['questions'][0];
       question = firstQuestion['question'] ?? '';
       choices = firstQuestion['choices'] ?? [];
       correctAnswer = firstQuestion['correct_answer'] ?? firstQuestion['correctAnswer'] ?? '';
+      print('DEBUG: Extracted question from array: "$question" (length: ${question.length})');
+      print('DEBUG: Extracted choices count: ${choices.length}');
     } else {
       // Fallback to old structure
       question = getNested(['body', 'question']) ?? getNested(['question']) ?? '';
       choices = getNested(['body', 'choices']) ?? getNested(['choices']) ?? [];
       correctAnswer = getNested(['body', 'correctAnswer']) ?? getNested(['correctAnswer']) ?? '';
+      print('DEBUG: Used fallback - question: "$question" (length: ${question.length})');
     }
 
     // Extract economic insight data

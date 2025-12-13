@@ -317,6 +317,9 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildProblemContent() {
+    print('DEBUG _buildProblemContent: question="${widget.problem.question}" (isEmpty: ${widget.problem.question.isEmpty})');
+    print('DEBUG _buildProblemContent: content="${widget.problem.content.substring(0, widget.problem.content.length > 50 ? 50 : widget.problem.content.length)}..."');
+    print('DEBUG _buildProblemContent: choices count=${widget.problem.choices.length}');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
