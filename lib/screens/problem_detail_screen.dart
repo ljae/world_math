@@ -1084,6 +1084,33 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     );
   }
 
+  Widget _buildSimpleWebUI() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('--- METADATA (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text('Grade: ${widget.problem.gradeLevel}'),
+        Text('Difficulty: ${widget.problem.difficulty}'),
+        Text('Topic: ${widget.problem.mathTopic}'),
+        Text('Theme: ${widget.problem.economicTheme}'),
+        const SizedBox(height: 20),
+        const Text('--- SCENARIO (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text(widget.problem.content),
+        const SizedBox(height: 20),
+        const Text('--- QUESTION (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
+        Text('Q. ${widget.problem.question}'),
+        const SizedBox(height: 20),
+        const Text('--- CHOICES (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
+        ...widget.problem.choices.map((c) => Text(c)).toList(),
+        const SizedBox(height: 20),
+        if (_isSubmitted && _isCorrect) ...[
+          const Text('--- EXPLANATION (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(widget.problem.explanation),
+        ]
+      ],
+    );
+  }
+
   Widget _buildMetadataInfo() {
     // ORIGINAL STYLED VERSION - restored for local app
     return Container(
@@ -1379,17 +1406,90 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
           child: Container(color: Colors.black, height: 2.0),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: kIsWeb
-            ? contentColumn
-            : FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: contentColumn,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            bottom: 120, // Space for bottom bar
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: kIsWeb
+                ? _buildSimpleWebUI()
+                : FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: contentColumn,
+                    ),
+                  ),
+            ),
+          ),
+          
+          // Bottom Bar
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -5))],
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!_isSubmitted || !_isCorrect)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _answerController,
+                              decoration: InputDecoration(
+                                hintText: '정답을 입력하세요',
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                prefixIcon: const Icon(Icons.create),
+                                filled: true,
+                                fillColor: Colors.grey[50],
+                              ),
+                              onSubmitted: (_) => _submit(),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Material(
+                            color: Colors.black87,
+                            borderRadius: BorderRadius.circular(8),
+                            child: InkWell(
+                              onTap: _submit,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.send, color: Colors.white, size: 18),
+                                    SizedBox(width: 8),
+                                    Text('제출', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (_isSubmitted && _isCorrect)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                          child: const Text('목록으로'),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+            ),
+          ),
+        ],
       ),
     );
   }
