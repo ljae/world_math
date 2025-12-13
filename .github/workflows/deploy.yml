@@ -17,11 +17,14 @@ jobs:
         with:
           channel: 'master'
 
+      - name: Show Flutter version
+        run: flutter --version
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build for web
-        run: flutter build web --web-renderer html --release --base-href /world_math/
+        run: flutter build web --release --base-href /world_math/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
