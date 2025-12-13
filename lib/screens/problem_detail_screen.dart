@@ -342,30 +342,21 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         if (widget.problem.content.isNotEmpty)
           _buildMarkdown(widget.problem.content.replaceAll('[[IMAGE]]', '')), // Remove marker if present
 
-        // DEBUG: After content (where we know text renders)
-        const SizedBox(height: 16),
-        Text('━━━ DEBUG ━━━', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        Text('Question length: ${widget.problem.question.length}'),
-        Text('Question isEmpty: ${widget.problem.question.isEmpty}'),
-        Text('Question text: "${widget.problem.question}"'),
-        Text('Choices count: ${widget.problem.choices.length}'),
-        Text('━━━━━━━━━━━━━', style: TextStyle(fontSize: 20)),
-
-        // FORCE SHOW QUESTION - Remove isEmpty check to see if it's a data or rendering issue
         const SizedBox(height: 24),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
-            Expanded(child: Text('QUESTION: ${widget.problem.question} | LENGTH: ${widget.problem.question.length}',
-              style: TextStyle(fontSize: 14))), // Plain Text instead of markdown
-          ],
-        ),
+        if (widget.problem.question.isNotEmpty) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
+              Expanded(child: _buildMarkdown(widget.problem.question, boldText: true)),
+            ],
+          ),
+        ],
 
-        // FORCE SHOW CHOICES
         const SizedBox(height: 24),
-        Text('CHOICES (${widget.problem.choices.length}):'),
-        ...widget.problem.choices.map((choice) => Text('  - $choice')),
+        if (widget.problem.choices.isNotEmpty) ...[
+          _buildChoices(),
+        ],
       ],
     );
   }
@@ -1238,7 +1229,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
         title: Text(
-          'v20251213-1530 ${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
+          '${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
           style: const TextStyle(
             fontFamily: 'Paperlogy',
             fontSize: 16,

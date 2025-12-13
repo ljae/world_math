@@ -21,16 +21,7 @@ jobs:
         run: flutter pub get
 
       - name: Build for web
-        run: flutter build web --release --base-href /world_math/
-
-      - name: Force CanvasKit renderer (remove fallback)
-        run: |
-          echo "Before:"
-          grep -o '"builds":\[.*\]' build/web/flutter_bootstrap.js
-          sed -i 's/"builds":\[\([^]]*\),{}\]/"builds":[\1]/' build/web/flutter_bootstrap.js
-          echo "After:"
-          grep -o '"builds":\[.*\]' build/web/flutter_bootstrap.js
-          echo "✓ Forced CanvasKit renderer by removing fallback option"
+        run: flutter build web --release --base-href /world_math/ --web-renderer auto
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
