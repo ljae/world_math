@@ -317,12 +317,28 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildProblemContent() {
-    print('DEBUG _buildProblemContent: question="${widget.problem.question}" (isEmpty: ${widget.problem.question.isEmpty})');
-    print('DEBUG _buildProblemContent: content="${widget.problem.content.substring(0, widget.problem.content.length > 50 ? 50 : widget.problem.content.length)}..."');
-    print('DEBUG _buildProblemContent: choices count=${widget.problem.choices.length}');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // DEBUG: Visible data status indicator
+        Container(
+          padding: const EdgeInsets.all(12),
+          color: Colors.orange.withAlpha(50),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('🔍 DEBUG DATA STATUS:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Content length: ${widget.problem.content.length}'),
+              Text('Question: "${widget.problem.question}" (isEmpty: ${widget.problem.question.isEmpty})'),
+              Text('Choices: ${widget.problem.choices.length}'),
+              Text('Solution data: ${widget.problem.solutionData != null ? "EXISTS" : "NULL"}'),
+              Text('Economic insight: ${widget.problem.economicInsightData != null ? "EXISTS" : "NULL"}'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+
         if (widget.problem.imageUrl != null && widget.problem.imageUrl!.isNotEmpty) ...[
           Center(
              child: Container(
