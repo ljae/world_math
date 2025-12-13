@@ -1084,33 +1084,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     );
   }
 
-  Widget _buildSimpleWebUI() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('--- METADATA (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Grade: ${widget.problem.gradeLevel}'),
-        Text('Difficulty: ${widget.problem.difficulty}'),
-        Text('Topic: ${widget.problem.mathTopic}'),
-        Text('Theme: ${widget.problem.economicTheme}'),
-        const SizedBox(height: 20),
-        const Text('--- SCENARIO (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
-        Text(widget.problem.content),
-        const SizedBox(height: 20),
-        const Text('--- QUESTION (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
-        Text('Q. ${widget.problem.question}'),
-        const SizedBox(height: 20),
-        const Text('--- CHOICES (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
-        ...widget.problem.choices.map((c) => Text(c)).toList(),
-        const SizedBox(height: 20),
-        if (_isSubmitted && _isCorrect) ...[
-          const Text('--- EXPLANATION (DEBUG) ---', style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(widget.problem.explanation),
-        ]
-      ],
-    );
-  }
-
   Widget _buildMetadataInfo() {
     // ORIGINAL STYLED VERSION - restored for local app
     return Container(
@@ -1413,14 +1386,14 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: kIsWeb
-                ? _buildSimpleWebUI()
-                : FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SlideTransition(
-                      position: _slideAnimation,
-                      child: contentColumn,
+                  ? contentColumn
+                  : FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: contentColumn,
+                      ),
                     ),
-                  ),
             ),
           ),
           

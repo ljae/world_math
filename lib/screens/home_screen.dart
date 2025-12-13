@@ -90,23 +90,17 @@ class _HomeScreenState extends State<HomeScreen> {
     // For now, we'll use a mock user ID.
     final userId = 'mock_user_id';
 
-    bool isRevealed = _revealedIds.contains(problem.id);
+    // Mark as revealed if not already, but ALWAYS show the animation
+    if (!_revealedIds.contains(problem.id)) {
+      await _dataService.markRevealed(userId, problem.id);
+    }
 
-    if (isRevealed) {
+    if (mounted) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ProblemDetailScreen(problem: problem),
+          builder: (context) => ProblemRevealScreen(problem: problem),
         ),
       ).then((_) => _loadData());
-    } else {
-      await _dataService.markRevealed(userId, problem.id);
-      if (mounted) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => ProblemRevealScreen(problem: problem),
-          ),
-        ).then((_) => _loadData());
-      }
     }
   }
 

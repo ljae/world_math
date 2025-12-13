@@ -520,3 +520,37 @@ The root cause appears to be a combination of:
 **Impact:** Web users cannot see questions, choices, or metadata, making the app partially unusable.
 
 **Priority:** High - requires immediate platform-specific solution or web renderer change.
+---
+
+## Debugging Log & Final Diagnosis (2025-12-13)
+
+After extensive debugging, the issue remains unresolved. The evidence strongly suggests a framework-level bug in Flutter's web engine for release builds.
+
+**Summary of Investigation:**
+
+1.  **Problem Confirmation:** The issue where `Metadata`, `Question`, and `Choices` sections fail to render only in web release builds was consistently reproduced. The "Explanation" section correctly renders after a state change, which was a key focus of the investigation.
+
+2.  **Attempted Fixes & Ruled-Out Causes:**
+    *   **Web Renderer:** Switched the build from the default (CanvasKit) to the **HTML renderer** (`--dart-define=FLUTTER_WEB_RENDERER=html`). The problem persisted, ruling out a renderer-specific issue.
+    *   **Build Configuration:** Ensured the CI was using a recent Flutter version from the `master` channel (`3.40.0-1.0.pre-158`) to rule out version-specific flag issues. The problem persisted.
+    *   **Animations:** Conditionally disabled `FadeTransition` and `SlideTransition` on the affected screen for web builds. This had no effect.
+    *   **Forced Re-rendering:** Forced a `setState()` call with a short delay after the screen's `initState` to check for an initial rendering glitch. This did not fix the issue.
+    *   **Layout Simplification:** Removed the `Stack` and `Positioned` layout widgets to see if they were the cause. The content still failed to render.
+    *   **"Scorched Earth" UI Test:** Replaced the entire complex UI with a minimal `Column` of basic `Text` widgets. **Even this most basic UI failed to render**, which is the most definitive evidence of a framework bug.
+
+**Conclusion:**
+
+The fact that even a simple `Column` of `Text` widgets fails to render in this specific part of the widget tree, only in a web release build, strongly indicates a bug within the Flutter framework's web engine. The issue is not with the application-level code that was modified.
+
+**Recommendation: File a Bug Report with the Flutter Team**
+
+The only remaining course of action is to report this to the Flutter team on GitHub.
+
+*   **Report URL:** [https://github.com/flutter/flutter/issues/new/choose](https://github.com/flutter/flutter/issues/new/choose)
+*   **Suggested Title:** `Flutter Web Release: Widgets in a Column fail to render inside a SingleChildScrollView`
+*   **Key Information to Include:**
+    *   A summary of the problem and the debugging steps taken (this document can be used).
+    *   The output of `flutter doctor -v`.
+    *   A **Minimal, Reproducible Example**. This is critical. It should be a new, small Flutter project that demonstrates the bug with the least amount of code possible (e.g., a `Scaffold` -> `SingleChildScrollView` -> `Column` -> `Text`).
+
+This is the final diagnosis after exhausting all reasonable debugging steps at the application level.
