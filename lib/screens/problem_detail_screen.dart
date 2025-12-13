@@ -1084,11 +1084,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // WEB FIX: Use .shade instead of [] for non-nullable colors
+    // ORIGINAL STYLED VERSION - restored for local app
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,  // Non-nullable
+        color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.black12),
       ),
@@ -1194,9 +1194,9 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   Widget _buildMetaItem(String label, String value, IconData icon) {
     if (value.isEmpty) return const SizedBox.shrink();
     return Row(
-      mainAxisSize: MainAxisSize.max,  // WEB FIX: Use max instead of min
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: Colors.grey.shade600),  // WEB FIX: Non-nullable
+        Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Text(
           '$label: ',
@@ -1204,10 +1204,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             fontFamily: 'Paperlogy',
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey.shade600,  // WEB FIX: Non-nullable
+            color: Colors.grey[600],
           ),
         ),
-        Expanded(  // WEB FIX: Use Expanded instead of Flexible
+        Flexible(
           child: Text(
             value,
             style: const TextStyle(
@@ -1308,11 +1308,8 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
-                      // Metadata Row with explicit width constraint for web
-                      SizedBox(
-                        width: double.infinity,
-                        child: _buildMetadataInfo(),
-                      ),
+                      // Metadata Row
+                      _buildMetadataInfo(),
                       const SizedBox(height: 24),
 
                       // Divider
