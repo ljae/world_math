@@ -1084,24 +1084,45 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // ULTRA SIMPLE: No Container, no decoration, just plain text
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('학년: ${widget.problem.gradeLevel}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Text('난이도: ${widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : "미정"}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Text('수학 주제: ${widget.problem.mathTopic}',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        if (widget.problem.economicTheme.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Text('경제 테마: ${widget.problem.economicTheme}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+    // ORIGINAL STYLED VERSION - restored for local app
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.black12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
+              const SizedBox(width: 16),
+              _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetaItem('수학 주제', widget.problem.mathTopic, Icons.calculate),
+              ),
+            ],
+          ),
+          if (widget.problem.economicTheme.isNotEmpty) ...[
+            const SizedBox(height: 12),
+             Row(
+              children: [
+                Expanded(
+                  child: _buildMetaItem('경제 테마', widget.problem.economicTheme, Icons.monetization_on),
+                ),
+              ],
+            ),
+          ],
         ],
-      ],
+      ),
     );
 
     /* TEST CODE REMOVED
@@ -1175,15 +1196,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF757575)), // Grey 600 explicit
+        Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Text(
           '$label: ',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Paperlogy',
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF757575), // Grey 600 explicit
+            color: Colors.grey[600],
           ),
         ),
         Flexible(
@@ -1287,18 +1308,8 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
-                      // TEST: Simple text before metadata
-                      const Text('>>> METADATA SHOULD APPEAR BELOW <<<',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 8),
-
                       // Metadata Row
                       _buildMetadataInfo(),
-
-                      // TEST: Simple text after metadata
-                      const SizedBox(height: 8),
-                      const Text('>>> METADATA SHOULD APPEAR ABOVE <<<',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 24),
 
                       // Divider
