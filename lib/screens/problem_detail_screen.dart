@@ -347,7 +347,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
-              Expanded(child: _buildMarkdown('**${widget.problem.question}**')), // Bold question
+              Expanded(child: _buildMarkdown('**${widget.problem.question.trim()}**')), // Bold with trim to fix markdown
             ],
           ),
         ],
