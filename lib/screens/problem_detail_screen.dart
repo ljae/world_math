@@ -349,8 +349,8 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         Text('Question isEmpty: ${widget.problem.question.isEmpty}'),
         Text('Question text: "${widget.problem.question}"'),
         Text('Choices count: ${widget.problem.choices.length}'),
-        Text('━━━━━━━━━━━━━', style: TextStyle(fontSize: 20))
-        
+        Text('━━━━━━━━━━━━━', style: TextStyle(fontSize: 20)),
+
         if (widget.problem.question.isNotEmpty) ...[
           const SizedBox(height: 24),
           Row(
