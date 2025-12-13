@@ -320,22 +320,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // DEBUG: Visible data status indicator
-        Container(
-          padding: const EdgeInsets.all(12),
-          color: Colors.orange.withAlpha(50),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('🔍 DEBUG DATA STATUS:', style: TextStyle(fontWeight: FontWeight.bold)),
-              Text('Content length: ${widget.problem.content.length}'),
-              Text('Question: "${widget.problem.question}" (isEmpty: ${widget.problem.question.isEmpty})'),
-              Text('Choices: ${widget.problem.choices.length}'),
-              Text('Solution data: ${widget.problem.solutionData != null ? "EXISTS" : "NULL"}'),
-              Text('Economic insight: ${widget.problem.economicInsightData != null ? "EXISTS" : "NULL"}'),
-            ],
-          ),
-        ),
+        // DEBUG: Plain text without Container (Container doesn't render on web!)
+        Text('🔍 DEBUG: Q="${widget.problem.question.substring(0, widget.problem.question.length > 30 ? 30 : widget.problem.question.length)}..." isEmpty=${widget.problem.question.isEmpty}',
+          style: TextStyle(fontSize: 12, backgroundColor: Colors.yellow)),
+        Text('DEBUG: Choices=${widget.problem.choices.length}, Solution=${widget.problem.solutionData != null}',
+          style: TextStyle(fontSize: 12, backgroundColor: Colors.yellow)),
         const SizedBox(height: 16),
 
 
