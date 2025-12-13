@@ -351,21 +351,21 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         Text('Choices count: ${widget.problem.choices.length}'),
         Text('━━━━━━━━━━━━━', style: TextStyle(fontSize: 20)),
 
-        if (widget.problem.question.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
-              Expanded(child: _buildMarkdown(widget.problem.question, boldText: true)), // Use boldText parameter
-            ],
-          ),
-        ],
+        // FORCE SHOW QUESTION - Remove isEmpty check to see if it's a data or rendering issue
+        const SizedBox(height: 24),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Q. ', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.blue)),
+            Expanded(child: Text('QUESTION: ${widget.problem.question} | LENGTH: ${widget.problem.question.length}',
+              style: TextStyle(fontSize: 14))), // Plain Text instead of markdown
+          ],
+        ),
 
-        if (widget.problem.choices.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          _buildChoices(),
-        ],
+        // FORCE SHOW CHOICES
+        const SizedBox(height: 24),
+        Text('CHOICES (${widget.problem.choices.length}):'),
+        ...widget.problem.choices.map((choice) => Text('  - $choice')),
       ],
     );
   }
