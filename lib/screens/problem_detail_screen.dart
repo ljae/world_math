@@ -1084,11 +1084,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // ORIGINAL STYLED VERSION - restored for local app
+    // WEB FIX: Use .shade instead of [] for non-nullable colors
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.grey.shade50,  // Non-nullable
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.black12),
       ),
@@ -1194,9 +1194,9 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   Widget _buildMetaItem(String label, String value, IconData icon) {
     if (value.isEmpty) return const SizedBox.shrink();
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,  // WEB FIX: Use max instead of min
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icon, size: 16, color: Colors.grey.shade600),  // WEB FIX: Non-nullable
         const SizedBox(width: 8),
         Text(
           '$label: ',
@@ -1204,10 +1204,10 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             fontFamily: 'Paperlogy',
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[600],
+            color: Colors.grey.shade600,  // WEB FIX: Non-nullable
           ),
         ),
-        Flexible(
+        Expanded(  // WEB FIX: Use Expanded instead of Flexible
           child: Text(
             value,
             style: const TextStyle(
@@ -1308,8 +1308,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                       ),
                       const SizedBox(height: 24),
 
-                      // Metadata Row
-                      _buildMetadataInfo(),
+                      // Metadata Row with explicit width constraint for web
+                      SizedBox(
+                        width: double.infinity,
+                        child: _buildMetadataInfo(),
+                      ),
                       const SizedBox(height: 24),
 
                       // Divider
