@@ -64,6 +64,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     _animationController.forward();
     _checkIfSolved();
     _startTimer();
+
+    // Force a rebuild after a short delay to work around a web release build issue.
+    if (kIsWeb) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
   }
   
   void _startTimer() {
