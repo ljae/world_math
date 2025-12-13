@@ -64,15 +64,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     _animationController.forward();
     _checkIfSolved();
     _startTimer();
-
-    // Force a rebuild after a short delay to work around a web release build issue.
-    if (kIsWeb) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
   }
   
   void _startTimer() {
@@ -1388,90 +1379,17 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
           child: Container(color: Colors.black, height: 2.0),
         ),
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            bottom: 120, // Space for bottom bar
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: kIsWeb
-                  ? contentColumn
-                  : FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: contentColumn,
-                      ),
-                    ),
-            ),
-          ),
-          
-          // Bottom Bar
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -5))],
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!_isSubmitted || !_isCorrect)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _answerController,
-                              decoration: InputDecoration(
-                                hintText: '정답을 입력하세요',
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                prefixIcon: const Icon(Icons.create),
-                                filled: true,
-                                fillColor: Colors.grey[50],
-                              ),
-                              onSubmitted: (_) => _submit(),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Material(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(8),
-                            child: InkWell(
-                              onTap: _submit,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.send, color: Colors.white, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('제출', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (_isSubmitted && _isCorrect)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                          child: const Text('목록으로'),
-                        ),
-                      ),
-                  ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: kIsWeb
+            ? contentColumn
+            : FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: contentColumn,
                 ),
               ),
-            ),
-          ),
-        ],
       ),
     );
   }
