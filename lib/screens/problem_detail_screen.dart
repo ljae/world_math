@@ -1084,11 +1084,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildMetadataInfo() {
-    // ORIGINAL STYLED VERSION - restored
+    // WEB FIX: Use .shade instead of [] to prevent null in release builds
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.black12),
       ),
@@ -1196,7 +1196,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icon, size: 16, color: Colors.grey.shade600),
         const SizedBox(width: 8),
         Text(
           '$label: ',
@@ -1204,7 +1204,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             fontFamily: 'Paperlogy',
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[600],
+            color: Colors.grey.shade600,
           ),
         ),
         Flexible(
