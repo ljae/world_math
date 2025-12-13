@@ -1225,6 +1225,143 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final contentColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Timer
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.timer, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  '${(_elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(_elapsedSeconds % 60).toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontFamily: 'Courier', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Day Indicator
+        Center(
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade500]),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [BoxShadow(color: Colors.blue.withAlpha(100), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(_getDayOfWeek(), style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Metadata Row
+        _buildMetadataInfo(),
+        const SizedBox(height: 24),
+
+        // Divider
+        Container(height: 2, color: Colors.black),
+        const SizedBox(height: 24),
+
+        // Problem Content
+        _buildProblemContent(),
+
+        const SizedBox(height: 40),
+
+        // News Link
+        if (widget.problem.newsTitle != null) ...[
+          Container(height: 2, color: Colors.black26),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: _launchNewsUrl,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.black, width: 2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.newspaper, color: Colors.blue.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Text('관련 경제 뉴스', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(widget.problem.newsTitle!, style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 15, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        // Explanation if Correct
+        if (_isSubmitted && _isCorrect) ...[
+          const SizedBox(height: 40),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green.withAlpha(12),
+              border: Border.all(color: Colors.green, width: 2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                  Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green.shade700),
+                    const SizedBox(width: 8),
+                    Text('정답 및 해설', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildExplanationContent(),
+              ],
+            ),
+          ),
+        ],
+
+        // Economic Insight Section (shown at the bottom after explanation)
+        if (_isSubmitted && _isCorrect && widget.problem.economicInsightData != null) ...[
+          const SizedBox(height: 24),
+          _buildEconomicInsight(),
+        ],
+        const SizedBox(height: 80),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF7),
       appBar: AppBar(
@@ -1248,148 +1385,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
             bottom: 120, // Space for bottom bar
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Timer
-                      Center(
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.timer, color: Colors.white, size: 16),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${(_elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(_elapsedSeconds % 60).toString().padLeft(2, '0')}',
-                                style: const TextStyle(fontFamily: 'Courier', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
+              child: kIsWeb
+                  ? contentColumn
+                  : FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: contentColumn,
                       ),
-                      
-                      // Day Indicator
-                      Center(
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          duration: const Duration(milliseconds: 600),
-                          curve: Curves.elasticOut,
-                          builder: (context, value, child) {
-                            return Transform.scale(
-                              scale: value,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade500]),
-                                  borderRadius: BorderRadius.circular(30),
-                                  boxShadow: [BoxShadow(color: Colors.blue.withAlpha(100), blurRadius: 12, offset: const Offset(0, 4))],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.calendar_today, color: Colors.white, size: 20),
-                                    const SizedBox(width: 8),
-                                    Text(_getDayOfWeek(), style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Metadata Row
-                      _buildMetadataInfo(),
-                      const SizedBox(height: 24),
-
-                      // Divider
-                      Container(height: 2, color: Colors.black),
-                      const SizedBox(height: 24),
-
-                      // Problem Content
-                      _buildProblemContent(),
-
-                      const SizedBox(height: 40),
-
-                      // News Link
-                      if (widget.problem.newsTitle != null) ...[
-                        Container(height: 2, color: Colors.black26),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: _launchNewsUrl,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.black, width: 2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.newspaper, color: Colors.blue.shade700, size: 20),
-                                    const SizedBox(width: 8),
-                                    Text('관련 경제 뉴스', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(widget.problem.newsTitle!, style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 15, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-
-                      // Explanation if Correct
-                      if (_isSubmitted && _isCorrect) ...[
-                        const SizedBox(height: 40),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.green.withAlpha(12),
-                            border: Border.all(color: Colors.green, width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                                Row(
-                                children: [
-                                  Icon(Icons.check_circle, color: Colors.green.shade700),
-                                  const SizedBox(width: 8),
-                                  Text('정답 및 해설', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _buildExplanationContent(),
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      // Economic Insight Section (shown at the bottom after explanation)
-                      if (_isSubmitted && _isCorrect && widget.problem.economicInsightData != null) ...[
-                        const SizedBox(height: 24),
-                        _buildEconomicInsight(),
-                      ],
-                      const SizedBox(height: 80),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
             ),
           ),
           
