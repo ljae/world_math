@@ -416,25 +416,18 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       return _buildStructuredSolution();
     }
 
-    // Fallback to simple explanation
-    final explanation = widget.problem.explanation.trim();
-
-    if (explanation.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Text(
-          '해설이 아직 준비되지 않았습니다.',
-          style: TextStyle(
-            fontFamily: 'Paperlogy',
-            fontSize: 16,
-            color: Colors.grey,
-            fontStyle: FontStyle.italic,
-          ),
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Text(
+        '해설이 아직 준비되지 않았습니다.',
+        style: TextStyle(
+          fontFamily: 'Paperlogy',
+          fontSize: 16,
+          color: Colors.grey,
+          fontStyle: FontStyle.italic,
         ),
-      );
-    }
-
-    return _buildMarkdown(explanation);
+      ),
+    );
   }
 
   Widget _buildStructuredSolution() {
@@ -654,10 +647,6 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
               ),
             ],
 
-            if (step['explanation'] != null) ...[
-              const SizedBox(height: 8),
-              _buildMarkdown(_convertToString(step['explanation'])),
-            ],
 
             if (step['note'] != null) ...[
               const SizedBox(height: 8),

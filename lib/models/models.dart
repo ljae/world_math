@@ -8,7 +8,6 @@ class Problem {
   final String question;
   final List<String> choices;
   final String correctAnswer;
-  final String explanation;
   final String? imageUrl;
   final String? newsTitle;
   final String? newsUrl;
@@ -31,7 +30,6 @@ class Problem {
     required this.question,
     required this.choices,
     required this.correctAnswer,
-    required this.explanation,
     this.imageUrl,
     this.newsTitle,
     this.newsUrl,
@@ -56,7 +54,6 @@ class Problem {
       'question': question,
       'choices': choices,
       'correctAnswer': correctAnswer,
-      'explanation': explanation,
       'imageUrl': imageUrl,
       'newsReference': {
         'title': newsTitle,
@@ -107,23 +104,10 @@ class Problem {
       return current;
     }
 
-    // Extract solution data
     final solutionRaw = getNested(['solution']);
     Map<String, dynamic>? solutionData;
-    String explanationString = '';
-
     if (solutionRaw is Map) {
-      solutionData = Map<String, dynamic>.from(solutionRaw);
-
-      // Create a simple text explanation as fallback
-      final approach = solutionRaw['approach'] ?? '';
-      final answer = solutionRaw['answer'] ?? '';
-      explanationString = '$approach\n\n$answer';
-    }
-
-    // Fallback for explanation if not in solution
-    if (explanationString.isEmpty) {
-      explanationString = getNested(['body', 'explanation']) ?? '';
+        solutionData = Map<String, dynamic>.from(solutionRaw);
     }
 
     // Extract problem data
@@ -194,7 +178,6 @@ class Problem {
       question: question,
       choices: List<String>.from(choices),
       correctAnswer: correctAnswer.toString(),
-      explanation: explanationString,
       imageUrl: getNested(['imageUrl']),
       newsTitle: newsTitle,
       newsUrl: newsUrl,

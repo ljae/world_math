@@ -89,11 +89,6 @@ class JsonProblemLoader {
       }
     }
 
-    // Convert solution to explanation markdown
-    final explanation = _convertSolutionToMarkdown(
-      json['solution'] as Map<String, dynamic>?,
-    );
-
     // Extract metadata
     final metadata = json['metadata'] as Map<String, dynamic>? ?? {};
     final newsRef = json['news_reference'] as Map<String, dynamic>?;
@@ -122,7 +117,6 @@ class JsonProblemLoader {
       question: questionText,
       choices: choices,
       correctAnswer: correctAnswer,
-      explanation: explanation,
       mathTopic: metadata['topic'] as String? ?? '',
       economicTheme: metadata['economic_theme'] as String? ?? '',
       difficulty: metadata['difficulty'] as String? ?? '',
@@ -134,96 +128,5 @@ class JsonProblemLoader {
       newsReferenceData: newsRef,
       scenarioText: scenarioText,
     );
-  }
-
-  /// Convert solution JSON to markdown explanation
-  String _convertSolutionToMarkdown(
-    Map<String, dynamic>? solution,
-  ) {
-    if (solution == null) return '';
-
-    final buffer = StringBuffer();
-    buffer.writeln('### 📝 정답 및 풀이\n');
-
-    // Handle different solution formats
-    if (solution.containsKey('steps')) {
-      // Array format (p_20251201 style)
-      final steps = solution['steps'] as List<dynamic>;
-      for (var step in steps) {
-        final stepData = step as Map<String, dynamic>;
-        final stepNum = stepData['step'] as int?;
-        final description = stepData['description'] as String? ?? '';
-        final calculation = stepData['calculation'] as String? ?? '';
-
-        if (stepNum != null) {
-          buffer.writeln('**Step $stepNum. $description**\n');
-        } else {
-          buffer.writeln('**$description**\n');
-        }
-
-        if (calculation.isNotEmpty) {
-          buffer.writeln('\$\$');
-          buffer.writeln(calculation);
-          buffer.writeln('\$\$\n');
-        }
-      }
-
-      // Add final answer if exists
-      if (solution.containsKey('final_answer')) {
-        buffer.writeln('**✅ ${solution['final_answer']}**\n');
-      }
-    } else {
-      // Object format (p_20251203 style: step1, step2, step3...)
-      final stepKeys = solution.keys.where((k) => k.startsWith('step')).toList()
-        ..sort();
-
-      for (var key in stepKeys) {
-        final stepData = solution[key] as Map<String, dynamic>;
-        final title = stepData['title'] as String? ?? '';
-        final equation = stepData['equation'] as String? ?? '';
-        final process = stepData['process'] as List<dynamic>? ?? [];
-        final calculation = stepData['calculation'] as List<dynamic>? ?? [];
-        final conclusion = stepData['conclusion'] as String? ?? '';
-
-        buffer.writeln('**$title**\n');
-
-        if (equation.isNotEmpty) {
-          buffer.writeln('\$\$');
-          buffer.writeln(equation);
-          buffer.writeln('\$\$\n');
-        }
-
-        if (process.isNotEmpty) {
-          for (var line in process) {
-            buffer.writeln('\$');
-            buffer.write(line);
-            buffer.writeln('\$');
-          }
-          buffer.writeln();
-        }
-
-        if (calculation.isNotEmpty) {
-          for (var line in calculation) {
-            buffer.writeln(line);
-          }
-          buffer.writeln();
-        }
-
-        if (conclusion.isNotEmpty) {
-          buffer.writeln('**결론:** $conclusion\n');
-        }
-      }
-
-      // Add final answer
-      if (solution.containsKey('final_answer')) {
-        buffer.writeln('**✅ ${solution['final_answer']}**\n');
-      }
-    }
-
-    // NOTE: Economic insight is NOT added here anymore.
-    // It's stored separately in economicInsightData and displayed in its own section
-    // in problem_detail_screen.dart (always visible, not just when answer is correct)
-
-    return buffer.toString();
   }
 }
