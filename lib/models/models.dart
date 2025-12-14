@@ -132,7 +132,7 @@ class Problem {
     }
 
     // Extract economic insight data
-    final economicInsightRaw = getNested(['economic_insight']);
+    final economicInsightRaw = getNested(['economic_insight']) ?? getNested(['economicInsight']);
     Map<String, dynamic>? economicInsightData;
     if (economicInsightRaw is Map) {
       economicInsightData = Map<String, dynamic>.from(economicInsightRaw);

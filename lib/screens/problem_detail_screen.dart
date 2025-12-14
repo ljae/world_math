@@ -102,12 +102,370 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     super.dispose();
   }
 
+  bool _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: _isSubmitted, // Only allow automatic pop if already submitted
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _handleBackNavigation();
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFDFBF7),
+        appBar: _buildAppBar(),
+        body: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(
+                children: [
+                  Positioned.fill(
+                    bottom: 120, // Space for bottom bar
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: kIsWeb
+                          ? _buildContentColumn()
+                          : FadeTransition(
+                              opacity: _fadeAnimation,
+                              child: SlideTransition(
+                                position: _slideAnimation,
+                                child: _buildContentColumn(),
+                              ),
+                            ),
+                    ),
+                  ),
+                  
+                  // Bottom Bar
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: _buildBottomBar(),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      title: Text(
+        '${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
+        style: const TextStyle(
+          fontFamily: 'Paperlogy',
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      backgroundColor: const Color(0xFFFDFBF7),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(2.0),
+        child: Container(color: Colors.black, height: 2.0),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+     return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -5))],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!_isSubmitted || !_isCorrect)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _answerController,
+                      decoration: InputDecoration(
+                        hintText: '정답을 입력하세요',
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        prefixIcon: const Icon(Icons.create),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      onSubmitted: (_) => _submit(),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Material(
+                    color: Colors.black87,
+                    borderRadius: BorderRadius.circular(8),
+                    child: InkWell(
+                      onTap: _submit,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.send, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text('제출', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            if (_isSubmitted && _isCorrect)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                  child: const Text('목록으로'),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Timer
+        Center(
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.timer, color: Colors.white, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  '${(_elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(_elapsedSeconds % 60).toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontFamily: 'Courier', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Day Indicator
+        Center(
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade500]),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [BoxShadow(color: Colors.blue.withAlpha(100), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.calendar_today, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(_getDayOfWeek(), style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Metadata Row
+        _buildMetadataInfo(),
+        const SizedBox(height: 24),
+
+        // Divider
+        Container(height: 2, color: Colors.black),
+        const SizedBox(height: 24),
+
+        // Problem Content
+        _buildProblemContent(),
+
+        const SizedBox(height: 40),
+
+        // News Link
+        if (widget.problem.newsTitle != null) ...[
+          Container(height: 2, color: Colors.black26),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: _launchNewsUrl,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.black, width: 2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.newspaper, color: Colors.blue.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Text('관련 경제 뉴스', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(widget.problem.newsTitle!, style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 15, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+                ],
+              ),
+            ),
+          ),
+        ],
+
+        // Explanation if Correct
+        if (_isSubmitted && _isCorrect) ...[
+          const SizedBox(height: 40),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.green.withAlpha(12),
+              border: Border.all(color: Colors.green, width: 2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                  Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green.shade700),
+                    const SizedBox(width: 8),
+                    Text('정답 및 해설', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildExplanationContent(),
+              ],
+            ),
+          ),
+        ],
+
+        // Economic Insight Section (shown at the bottom after explanation)
+        if (_isSubmitted && _isCorrect)
+          if (widget.problem.economicInsightData != null) ...[
+            const SizedBox(height: 24),
+            _buildEconomicInsight(),
+          ] else if (kDebugMode) ...[ // Only show missing message in debug or if user requests
+             const SizedBox(height: 24),
+             Container(
+               padding: const EdgeInsets.all(16),
+               color: Colors.grey.shade100,
+               child: const Text('DEBUG: Economic Insight Data is missing for this problem.', style: TextStyle(color: Colors.grey)),
+             ),
+          ],
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+
+  Future<void> _handleBackNavigation() async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('정말 나가시겠습니까?'),
+        content: const Text('지금 나가시면 "오답" 처리됩니다.\n(한 번만 도전할 수 있습니다!)'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false), // Cancel
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), // Confirm leave
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('나가기 (오답 처리)'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLeave == true) {
+      // Mark as incorrect before leaving
+      await _submitWrongAnswerAndExit();
+    }
+  }
+
+  Future<void> _submitWrongAnswerAndExit() async {
+     _stopTimer();
+     final userId = 'mock_user_id';
+     
+     // Record incorrect attempt
+     await _dataService.recordAttempt(
+      userId,
+      widget.problem.id, 
+      false, // isCorrect = false
+      timeTakenSeconds: _elapsedSeconds,
+    );
+    
+    if (mounted) {
+      Navigator.of(context).pop(); // Actually exit the screen
+    }
+  }
+
+  String _parseCorrectAnswer(String raw) {
+    String clean = raw.trim();
+    if (clean.isEmpty) return '1'; // Default
+
+    // 1. Check for starting digits
+    final match = RegExp(r'^(\d+)').firstMatch(clean);
+    if (match != null) {
+      return match.group(1)!;
+    }
+
+    // 2. Check for circled numbers
+    const circledNumbers = {
+      '①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5',
+      '➊': '1', '➋': '2', '➌': '3', '➍': '4', '➎': '5'
+    };
+    
+    for (var entry in circledNumbers.entries) {
+      if (clean.startsWith(entry.key)) {
+        return entry.value;
+      }
+    }
+
+    return clean; // Return original if no pattern matches (though unexpected)
+  }
+
   void _submit() async {
-    if (_answerController.text.isEmpty) return;
+    if (_answerController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('답을 선택해주세요!')),
+        );
+        return;
+    }
     _stopTimer();
 
     final userId = 'mock_user_id';
-    final isCorrect = _answerController.text == widget.problem.correctAnswer;
+    
+    // Normalize user input and correct answer
+    final selectedDiff = _answerController.text.trim();
+    final correctRaw = widget.problem.correctAnswer;
+    final correctDiff = _parseCorrectAnswer(correctRaw);
+    
+    final isCorrect = selectedDiff == correctDiff;
+
+    // Debugging (simulated by print)
+    if (kDebugMode) {
+      print('Checking Answer: User[$selectedDiff] vs CorrectRaw[$correctRaw] -> Parsed[$correctDiff] : $isCorrect');
+    }
+
     await _dataService.recordAttempt(
       userId,
       widget.problem.id, 
@@ -363,10 +721,27 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
   Widget _buildChoices() {
     return Column(
-      children: widget.problem.choices.map((choice) {
-        final choiceValue = choice.substring(0, 1); // Get ①
-        final choiceMap = {'①': '1', '②': '2', '③': '3', '④': '4', '⑤': '5'};
-        final answerVal = choiceMap[choiceValue] ?? '';
+      children: widget.problem.choices.asMap().entries.map((entry) {
+        final index = entry.key;
+        final rawText = entry.value;
+        
+        // Canonical answer value is always "1", "2", "3", ... based on index
+        final answerVal = (index + 1).toString();
+        
+        // Determine label to display (①, ②...)
+        const labels = ['①', '②', '③', '④', '⑤'];
+        final label = index < labels.length ? labels[index] : '${index + 1}.';
+
+        // Clean content for display: remove leading label if it exists in the data
+        String content = rawText.trim();
+        if (content.startsWith(label)) {
+          content = content.substring(label.length).trim();
+        } else if (content.startsWith('(${index + 1})')) {
+           content = content.substring('(${index + 1})'.length).trim();
+        } else if (content.startsWith('${index + 1}.')) {
+           content = content.substring('${index + 1}.'.length).trim();
+        }
+
         final isSelected = _answerController.text == answerVal;
 
         return GestureDetector(
@@ -389,18 +764,20 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // Align to top for multi-line
               children: [
                 Text(
-                  choiceValue,
+                  label,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     color: isSelected ? Colors.blue : Colors.black87,
+                    fontFamily: 'Paperlogy', 
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildMarkdown(choice.substring(1).trim()),
+                  child: _buildMarkdown(content),
                 ),
               ],
             ),
@@ -1212,249 +1589,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final contentColumn = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Timer
-        Center(
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.black87,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.timer, color: Colors.white, size: 16),
-                const SizedBox(width: 8),
-                Text(
-                  '${(_elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(_elapsedSeconds % 60).toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontFamily: 'Courier', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-        
-        // Day Indicator
-        Center(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.elasticOut,
-            builder: (context, value, child) {
-              return Transform.scale(
-                scale: value,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade500]),
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [BoxShadow(color: Colors.blue.withAlpha(100), blurRadius: 12, offset: const Offset(0, 4))],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.calendar_today, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text(_getDayOfWeek(), style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 24),
 
-        // Metadata Row
-        _buildMetadataInfo(),
-        const SizedBox(height: 24),
-
-        // Divider
-        Container(height: 2, color: Colors.black),
-        const SizedBox(height: 24),
-
-        // Problem Content
-        _buildProblemContent(),
-
-        const SizedBox(height: 40),
-
-        // News Link
-        if (widget.problem.newsTitle != null) ...[
-          Container(height: 2, color: Colors.black26),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: _launchNewsUrl,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: Colors.black, width: 2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.newspaper, color: Colors.blue.shade700, size: 20),
-                      const SizedBox(width: 8),
-                      Text('관련 경제 뉴스', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(widget.problem.newsTitle!, style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 15, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
-                ],
-              ),
-            ),
-          ),
-        ],
-
-        // Explanation if Correct
-        if (_isSubmitted && _isCorrect) ...[
-          const SizedBox(height: 40),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.green.withAlpha(12),
-              border: Border.all(color: Colors.green, width: 2),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                  Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green.shade700),
-                    const SizedBox(width: 8),
-                    Text('정답 및 해설', style: TextStyle(fontFamily: 'Paperlogy', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildExplanationContent(),
-              ],
-            ),
-          ),
-        ],
-
-        // Economic Insight Section (shown at the bottom after explanation)
-        if (_isSubmitted && _isCorrect && widget.problem.economicInsightData != null) ...[
-          const SizedBox(height: 24),
-          _buildEconomicInsight(),
-        ],
-        const SizedBox(height: 80),
-      ],
-    );
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDFBF7),
-      appBar: AppBar(
-        title: Text(
-          '${widget.problem.date.year + 1}학년도 대학수학능력시험 대비',
-          style: const TextStyle(
-            fontFamily: 'Paperlogy',
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color(0xFFFDFBF7),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2.0),
-          child: Container(color: Colors.black, height: 2.0),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            bottom: 120, // Space for bottom bar
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: kIsWeb
-                  ? contentColumn
-                  : FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: SlideTransition(
-                        position: _slideAnimation,
-                        child: contentColumn,
-                      ),
-                    ),
-            ),
-          ),
-          
-          // Bottom Bar
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 10, offset: const Offset(0, -5))],
-              ),
-              child: SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!_isSubmitted || !_isCorrect)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _answerController,
-                              decoration: InputDecoration(
-                                hintText: '정답을 입력하세요',
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                prefixIcon: const Icon(Icons.create),
-                                filled: true,
-                                fillColor: Colors.grey[50],
-                              ),
-                              onSubmitted: (_) => _submit(),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Material(
-                            color: Colors.black87,
-                            borderRadius: BorderRadius.circular(8),
-                            child: InkWell(
-                              onTap: _submit,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.send, color: Colors.white, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('제출', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (_isSubmitted && _isCorrect)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                          child: const Text('목록으로'),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildImageWidget(String imageUrl) {
     if (kIsWeb) {
