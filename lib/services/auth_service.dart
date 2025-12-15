@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter/services.dart';
 
 class AuthService {
@@ -18,9 +18,14 @@ class AuthService {
   Future<void> signOut() async {
     try {
       await _auth.signOut();
-      await GoogleSignIn.instance.signOut();
+
+      // Google Sign-Out
+      if (!kIsWeb) {
+        await GoogleSignIn.instance.signOut();
+      }
+
       // Kakao logout - only supported on Android/iOS
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
         try {
           await kakao.UserApi.instance.logout();
         } catch (e) {
@@ -38,6 +43,14 @@ class AuthService {
   // --------------------------------------------------------------------------
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      // Web platform uses different authentication flow
+      if (kIsWeb) {
+        // For web, use Firebase's signInWithPopup directly
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        return await _auth.signInWithPopup(googleProvider);
+      }
+
+      // For native platforms (iOS, Android, macOS)
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
       if (googleUser == null) return null; // The user canceled the sign-in
@@ -62,9 +75,13 @@ class AuthService {
   // Apple Login
   // --------------------------------------------------------------------------
   Future<UserCredential?> signInWithApple() async {
-    // Apple Sign-In on macOS requires a paid Apple Developer account
-    // For now, only enable on iOS
-    if (Platform.isMacOS) {
+    // Apple Sign-In is not supported on web or macOS (without paid account)
+    if (kIsWeb) {
+      debugPrint("Apple Sign-In is not supported on web");
+      throw UnsupportedError('Apple Sign-In is not supported on web. Please use Google or other sign-in methods.');
+    }
+
+    if (!kIsWeb && Platform.isMacOS) {
       debugPrint("Apple Sign-In on macOS requires a paid Apple Developer Program membership");
       throw UnsupportedError('Apple Sign-In on macOS requires a paid Apple Developer account. Use iOS or enable with a paid account.');
     }
@@ -96,6 +113,11 @@ class AuthService {
   // --------------------------------------------------------------------------
   Future<UserCredential?> signInWithKakao() async {
     // Kakao SDK only supports Android and iOS
+    if (kIsWeb) {
+      debugPrint("Kakao Sign-In is not supported on web");
+      throw UnsupportedError('Kakao Sign-In is only supported on Android and iOS');
+    }
+
     if (!Platform.isAndroid && !Platform.isIOS) {
       debugPrint("Kakao Sign-In is not supported on this platform (${Platform.operatingSystem})");
       throw UnsupportedError('Kakao Sign-In is only supported on Android and iOS');
