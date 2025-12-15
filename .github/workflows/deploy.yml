@@ -22,7 +22,7 @@ jobs:
         run: flutter pub get
 
       - name: Build for web with CanvasKit
-        run: flutter build web --web-renderer canvaskit --release --base-href /world_math/
+        run: flutter build web --wasm --release --base-href /world_math/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
