@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:world_math/services/firestore_service.dart'; // Keep this import
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:world_math/services/firestore_service.dart';
 import 'firebase_options.dart';
 import 'theme.dart';
-import 'screens/splash_screen.dart';
+import 'screens/landing_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -13,6 +14,10 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize Kakao SDK
+  // TODO: Replace with your actual Native App Key from Kakao Developers Console
+  KakaoSdk.init(nativeAppKey: 'YOUR_KAKAO_NATIVE_APP_KEY');
 
   // Upload problems from JSON files to Firebase (최초 1회만 실행)
   // ✅ JSON 데이터가 Firebase에 업로드 완료되어 주석 처리됨
@@ -45,7 +50,7 @@ class WorldMathApp extends StatelessWidget {
     return MaterialApp(
       title: '대치동 김부장 아들의 세상수학',
       theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+      home: const LandingScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

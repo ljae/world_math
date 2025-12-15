@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:url_launcher/url_launcher.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 import '../models/models.dart';
 import '../services/firestore_service.dart';
 import '../widgets/success_animation.dart';
@@ -84,7 +85,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Future<void> _checkIfSolved() async {
-    final userId = 'mock_user_id';
+    final userId = auth.FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
     final hasSolved = await _dataService.hasSolved(userId, widget.problem.id);
     if (mounted && hasSolved) {
       setState(() {
@@ -403,7 +404,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
   Future<void> _submitWrongAnswerAndExit() async {
      _stopTimer();
-     final userId = 'mock_user_id';
+     final userId = auth.FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
      
      // Record incorrect attempt
      await _dataService.recordAttempt(
@@ -452,7 +453,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
     }
     _stopTimer();
 
-    final userId = 'mock_user_id';
+    final userId = auth.FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
     
     // Normalize user input and correct answer
     final selectedDiff = _answerController.text.trim();

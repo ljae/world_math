@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import '../services/firestore_service.dart';
 import '../models/models.dart';
 import '../theme.dart';
@@ -48,8 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final solvedIds = <String>{};
       final revealedIds = <String>{};
 
-      // For now, we'll use a mock user ID.
-      final userId = 'mock_user_id';
+      // Get current logged-in user ID
+      final userId = auth.FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('사용자가 로그인하지 않았습니다');
+      }
 
       for (var p in problems) {
         if (await _dataService.hasSolved(userId, p.id)) {
@@ -87,8 +91,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openProblem(Problem problem) async {
-    // For now, we'll use a mock user ID.
-    final userId = 'mock_user_id';
+    // Get current logged-in user ID
+    final userId = auth.FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      CustomSnackbar.show(context, message: '사용자가 로그인하지 않았습니다', type: SnackbarType.error);
+      return;
+    }
 
     bool isRevealed = _revealedIds.contains(problem.id);
 

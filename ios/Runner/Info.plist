@@ -45,5 +45,26 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>KakaoAppKey</key>
+	<string>${359bb3c2ae9e0374c67b0baf91448c58}</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>kakaokompassauth</string>
+		<string>kakaolink</string>
+	</array>
+	<key>GIDClientID</key>
+	<string>597173933512-6eicmobqie9rc19s9klnlst1j1etnk3p.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>kakao${359bb3c2ae9e0374c67b0baf91448c58}</string>
+				<string>com.googleusercontent.apps.597173933512-6eicmobqie9rc19s9klnlst1j1etnk3p</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

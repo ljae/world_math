@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import '../models/models.dart';
 import '../services/firestore_service.dart';
 import '../theme.dart';
@@ -21,9 +22,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     // Get the current user's ID and fetch their history.
-    // For now, we'll use a mock user ID.
-    final userId = 'mock_user_id';
-    _historyFuture = _dataService.getHistory(userId);
+    final userId = auth.FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      _historyFuture = _dataService.getHistory(userId);
+    } else {
+      _historyFuture = Future.value([]);
+    }
   }
 
   @override

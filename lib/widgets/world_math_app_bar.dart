@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:world_math/models/models.dart';
 import '../theme.dart';
 import '../services/firestore_service.dart';
@@ -93,9 +94,13 @@ class WorldMathAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildUserProfile(BuildContext context) {
-    // For now, we'll use a mock user ID.
-    final userId = 'mock_user_id';
-    
+    // Get current logged-in user ID
+    final userId = auth.FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId == null) {
+      return const SizedBox(width: 100);
+    }
+
     return FutureBuilder<User?>(
       future: FirestoreService().getUser(userId),
       builder: (context, snapshot) {

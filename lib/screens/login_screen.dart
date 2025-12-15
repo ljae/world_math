@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:world_math/models/models.dart';
 import '../theme.dart';
 import '../services/firestore_service.dart';
@@ -16,10 +17,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final _nicknameController = TextEditingController();
   final _schoolController = TextEditingController();
   final _nicknameFocus = FocusNode(); 
-  final _loginButtonFocus = FocusNode(); // Added for login button focus
+  final _loginButtonFocus = FocusNode();
   
   School? _selectedSchool;
-  List<School> _latestOptions = []; // Cache for auto-selection
+  List<School> _latestOptions = [];
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -59,6 +60,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         if (mounted) _nicknameFocus.requestFocus();
       });
     });
+
+    // Pre-fill nickname from Firebase Auth if available
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    if (currentUser?.displayName != null) {
+      _nicknameController.text = currentUser!.displayName!;
+    }
   }
 
   @override
@@ -71,12 +78,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  // ... (previous _login code remains same, skipping update here as it's outside the target lines roughly or sticking to minimal edit) ...
-  // Actually, I need to keep the _login method. The tool replaces a block.
-  // I will assume the prompt implies I should perform the minimal necessary edits or if replacing a large block, include needed parts.
-  // Let's replace from start of state class to end of Autocomplete to be safe and clean.
-  
-  Future<void> _login() async {
+  Future<void> _completeProfile() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -90,41 +92,68 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       return;
     }
 
+    final currentUser = auth.FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인 정보가 없습니다. 다시 로그인해주세요.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
-    final userId = 'mock_user_id'; 
-    final user = User(
-      id: userId,
-      nickname: _nicknameController.text,
-      schoolName: _selectedSchool!.school_name,
-    );
-    await _dataService.updateUser(user);
+    try {
+      final user = User(
+        id: currentUser.uid,
+        nickname: _nicknameController.text,
+        schoolName: _selectedSchool!.school_name,
+      );
+      await _dataService.updateUser(user);
+      
+      // Update Firebase Auth Profile Display Name if changed
+      if (currentUser.displayName != _nicknameController.text) {
+        await currentUser.updateDisplayName(_nicknameController.text);
+      }
 
-    await Future.delayed(const Duration(milliseconds: 800));
+      await Future.delayed(const Duration(milliseconds: 800));
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const MainScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 0.1),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              )),
-              child: child,
-            ),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 500),
-      ),
-    );
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => const MainScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.1),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                )),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('프로필 저장 실패: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -155,49 +184,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Logo
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 1000),
-                        curve: Curves.elasticOut,
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              width: 270,
-                              height: 270,
-                              padding: const EdgeInsets.all(20.0),
-                              decoration: const BoxDecoration(
-                                color: Colors.transparent,
-                              ),
-                              child: Image.asset(
-                                'assets/images/logo.png',
-                                fit: BoxFit.contain,
-                              ),
+                       Text(
+                        '추가 정보 입력',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              color: AppTheme.primaryColor,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
                       ),
                       const SizedBox(height: 8),
-
-                      // Title
                       Text(
-                        '대치동 김부장 아들의\n세상수학',
+                        '원활한 서비스 이용을 위해\n나머지 정보를 입력해주세요.',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: AppTheme.primaryColor,
-                              height: 1.3,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '현실감각 체험수학',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppTheme.accentColor,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[600],
                             ),
                       ),
                       const SizedBox(height: 48),
@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       // Inputs
                       TextFormField(
                         controller: _nicknameController,
-                        focusNode: _nicknameFocus, // Attached FocusNode
+                        focusNode: _nicknameFocus,
                         decoration: const InputDecoration(
                           labelText: '닉네임',
                           prefixIcon: Icon(Icons.person_outline),
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         textInputAction: TextInputAction.next,
                         onFieldSubmitted: (_) {
-                          FocusScope.of(context).nextFocus(); // Move focus to School field
+                          FocusScope.of(context).nextFocus(); 
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -235,11 +235,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             return const Iterable<School>.empty();
                           }
                           try {
-                            // Search schools
                             final results = await _dataService.searchSchools(textEditingValue.text);
                             final options = results.toList();
                             
-                            // If no results, provide "Independent" option
                             if (options.isEmpty) {
                               options.add(School.independent());
                             }
@@ -249,8 +247,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             });
                             return options;
                           } catch (e) {
-                            print('Error searching schools: $e');
-                             // Fallback to independent on error? OR just empty
                              setState(() => _latestOptions = []);
                             return const Iterable<School>.empty();
                           }
@@ -260,35 +256,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             _selectedSchool = selection;
                           });
                           _schoolController.text = selection.school_name;
-                          _loginButtonFocus.requestFocus(); // Focus button on selection
+                          _loginButtonFocus.requestFocus();
                         },
                         fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                          // Ensure we only add the listener once. 
-                          // However, fieldViewBuilder can be rebuilt. 
-                          // A cleaner way is to use a StatefulWidget wrapper or just add/remove listener carefully.
-                          // Since FocusNode is passed in, we can just use a Focus widget or add listener.
-                          // Let's add a listener that checks on focus loss.
                           if (!fieldFocusNode.hasListeners) {
                             fieldFocusNode.addListener(() {
                               if (!fieldFocusNode.hasFocus) {
-                                // Lost focus (e.g. Tab pressed)
                                 if (_selectedSchool == null && _latestOptions.isNotEmpty && fieldTextEditingController.text.isNotEmpty) {
                                   final firstOption = _latestOptions.first;
-                                  // We need to call onSelected logic. 
-                                  // Since we don't have direct access to onSelected callback here easily without passing it down or calling it via controller update + manual state set.
-                                  // But we can just set the state and text.
-                                  // Note: The Autocomplete widget's internal state might not update if we just set our local state, 
-                                  // but setting the controller text usually triggers the options builder again or validates it.
-                                  // Actually, the cleanest is to update the controller text and our local state.
-                                  // AND we should probably verify if the current text matches the first option partially or just force it.
-                                  // The requirement is "automatically select first list".
-                                  
-                                  // We need to be careful about setState during build/layout, but this is a callback.
                                   setState(() {
                                     _selectedSchool = firstOption;
                                   });
                                   fieldTextEditingController.text = firstOption.school_name;
-                                  _loginButtonFocus.requestFocus(); // Focus button on auto-select (focus loss)
+                                  _loginButtonFocus.requestFocus();
                                 }
                               }
                             });
@@ -317,7 +297,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   _selectedSchool = firstOption;
                                 });
                                 fieldTextEditingController.text = firstOption.school_name;
-                                _loginButtonFocus.requestFocus(); // Focus button on auto-select (Enter)
+                                _loginButtonFocus.requestFocus();
                               }
                               onFieldSubmitted(); 
                             },
@@ -368,9 +348,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         duration: const Duration(milliseconds: 300),
                         height: 56,
                         child: ElevatedButton(
-                          // _selectedSchool이 null이면 버튼 비활성화
-                          focusNode: _loginButtonFocus, // Attached FocusNode
-                          onPressed: _isLoading || _selectedSchool == null ? null : _login,
+                          focusNode: _loginButtonFocus,
+                          onPressed: _isLoading || _selectedSchool == null ? null : _completeProfile,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor: AppTheme.primaryColor,
@@ -380,7 +359,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            // _selectedSchool이 null일 때의 비활성화 스타일
                             disabledBackgroundColor: Colors.grey.shade300,
                           ),
                           child: _isLoading
@@ -395,9 +373,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               : const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.login, size: 20),
+                                    Icon(Icons.check, size: 20),
                                     SizedBox(width: 8),
-                                    Text('입장하기', style: TextStyle(fontSize: 18)),
+                                    Text('시작하기', style: TextStyle(fontSize: 18)),
                                   ],
                                 ),
                         ),

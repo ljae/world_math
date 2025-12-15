@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:world_math/models/models.dart';
 import '../services/firestore_service.dart';
 import '../theme.dart';
@@ -75,8 +76,8 @@ class _RankingScreenState extends State<RankingScreen>
 
           final individualRankings = snapshot.data![0] as List<RankingItem>;
           final schoolRankings = snapshot.data![1] as List<SchoolRankingItem>;
-          // For now, we'll use a mock user ID.
-          final currentUserId = 'mock_user_id';
+          // Get current logged-in user ID
+          final currentUserId = auth.FirebaseAuth.instance.currentUser?.uid ?? '';
 
           return Column(
             children: [
