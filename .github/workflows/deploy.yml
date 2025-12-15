@@ -15,13 +15,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'master'
+          channel: 'stable'
+          flutter-version: '3.24.0'
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build for web
-        run: flutter build web --dart-define=FLUTTER_WEB_RENDERER=html --release --base-href /world_math/
+      - name: Build for web with CanvasKit
+        run: flutter build web --web-renderer canvaskit --release --base-href /world_math/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
