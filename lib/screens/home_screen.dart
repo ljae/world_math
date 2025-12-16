@@ -12,6 +12,9 @@ import 'problem_reveal_screen.dart';
 import '../widgets/world_math_app_bar.dart';
 import '../widgets/mini_calendar_icon.dart';
 
+// Global RouteObserver to track route changes
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,7 +22,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   final FirestoreService _dataService = FirestoreService();
 
   DateTime _currentWeekStart = DateTime.now();
@@ -36,6 +39,29 @@ class _HomeScreenState extends State<HomeScreen> {
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     _currentWeekStart = DateTime.utc(startOfWeek.year, startOfWeek.month, startOfWeek.day);
 
+    _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route changes
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    // Unsubscribe from route changes
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when returning to this screen (e.g., after Navigator.pop())
     _loadData();
   }
 

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-import 'package:world_math/services/firestore_service.dart';
 import 'firebase_options.dart';
 import 'theme.dart';
 import 'screens/landing_screen.dart';
+import 'screens/home_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
@@ -51,6 +51,7 @@ class WorldMathApp extends StatelessWidget {
       title: '대치동 김부장 아들의 세상수학',
       theme: AppTheme.lightTheme,
       home: const LandingScreen(),
+      navigatorObservers: [routeObserver],
       debugShowCheckedModeBanner: false,
     );
   }

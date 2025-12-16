@@ -24,10 +24,11 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   final _answerController = TextEditingController();
   bool _isSubmitted = false;
   bool _isCorrect = false;
+  bool _hasIncorrectAttempt = false; // Track if user has already been marked incorrect
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
+
   // Timer state
   Timer? _timer;
   int _elapsedSeconds = 0;
@@ -108,7 +109,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _isSubmitted, // Only allow automatic pop if already submitted
+      canPop: _isSubmitted || _hasIncorrectAttempt, // Allow pop if submitted or already marked incorrect
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         await _handleBackNavigation();
@@ -116,7 +117,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       child: Scaffold(
         backgroundColor: const Color(0xFFFDFBF7),
         appBar: _buildAppBar(),
-        body: _isLoading 
+        body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Stack(
                 children: [
@@ -135,7 +136,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
                             ),
                     ),
                   ),
-                  
+
                   // Bottom Bar
                   Align(
                     alignment: Alignment.bottomCenter,
@@ -166,7 +167,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   }
 
   Widget _buildBottomBar() {
-     return Container(
+    return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -405,15 +406,15 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
   Future<void> _submitWrongAnswerAndExit() async {
      _stopTimer();
      final userId = auth.FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
-     
+
      // Record incorrect attempt
      await _dataService.recordAttempt(
       userId,
-      widget.problem.id, 
+      widget.problem,
       false, // isCorrect = false
       timeTakenSeconds: _elapsedSeconds,
     );
-    
+
     if (mounted) {
       Navigator.of(context).pop(); // Actually exit the screen
     }
@@ -469,7 +470,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
 
     await _dataService.recordAttempt(
       userId,
-      widget.problem.id, 
+      widget.problem,
       isCorrect,
       timeTakenSeconds: _elapsedSeconds,
     );
@@ -485,6 +486,7 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
       _showResultDialog('오답입니다. 다시 풀어보세요.', false);
       setState(() {
         _isSubmitted = false;
+        _hasIncorrectAttempt = true; // Mark that user has been recorded as incorrect
         _startTimer();
       });
     }

@@ -74,9 +74,9 @@ class FirestoreService {
     return doc.exists;
   }
   
-  Future<void> recordAttempt(String userId, String problemId, bool isCorrect, {int timeTakenSeconds = 0}) async {
+  Future<void> recordAttempt(String userId, Problem problem, bool isCorrect, {int timeTakenSeconds = 0}) async {
     // Check if there's an existing attempt
-    final docRef = _db.collection('users').doc(userId).collection('history').doc(problemId);
+    final docRef = _db.collection('users').doc(userId).collection('history').doc(problem.id);
     final docSnapshot = await docRef.get();
 
     bool finalIsCorrect = isCorrect;
@@ -90,7 +90,10 @@ class FirestoreService {
     }
 
     final attempt = Attempt(
-      problemId: problemId,
+      problemId: problem.id,
+      problemTitle: problem.title,
+      problemDate: problem.date.toIso8601String().split('T')[0],
+      gradeLevel: problem.gradeLevel,
       isCorrect: finalIsCorrect,
       solvedAt: DateTime.now(),
       timeTakenSeconds: timeTakenSeconds,

@@ -223,12 +223,18 @@ class User {
 
 class Attempt {
   final String problemId;
+  final String problemTitle;
+  final String problemDate;
+  final String gradeLevel;
   final bool isCorrect;
   final DateTime solvedAt;
   final int timeTakenSeconds;
 
   Attempt({
     required this.problemId,
+    required this.problemTitle,
+    required this.problemDate,
+    required this.gradeLevel,
     required this.isCorrect,
     required this.solvedAt,
     this.timeTakenSeconds = 0,
@@ -236,7 +242,10 @@ class Attempt {
 
   factory Attempt.fromMap(Map<String, dynamic> map) {
     return Attempt(
-      problemId: map['problemId'],
+      problemId: map['problemId'] ?? '',
+      problemTitle: map['problemTitle'] ?? '',
+      problemDate: map['problemDate'] ?? '',
+      gradeLevel: map['gradeLevel'] ?? '',
       isCorrect: map['isCorrect'] ?? false,
       solvedAt: DateTime.parse(map['solvedAt']),
       timeTakenSeconds: map['timeTakenSeconds'] ?? 0,
@@ -246,6 +255,9 @@ class Attempt {
   Map<String, dynamic> toMap() {
     return {
       'problemId': problemId,
+      'problemTitle': problemTitle,
+      'problemDate': problemDate,
+      'gradeLevel': gradeLevel,
       'isCorrect': isCorrect,
       'solvedAt': solvedAt.toIso8601String(),
       'timeTakenSeconds': timeTakenSeconds,
