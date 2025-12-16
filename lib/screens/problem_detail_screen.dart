@@ -1467,10 +1467,12 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
           Row(
             children: [
               Expanded(
+                flex: 2,
                 child: _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
               ),
               const SizedBox(width: 16),
               Expanded(
+                flex: 1,
                 child: _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
               ),
             ],
