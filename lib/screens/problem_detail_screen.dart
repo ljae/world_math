@@ -1466,9 +1466,13 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         children: [
           Row(
             children: [
-              _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
+              Expanded(
+                child: _buildMetaItem('학년', widget.problem.gradeLevel, Icons.school),
+              ),
               const SizedBox(width: 16),
-              _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
+              Expanded(
+                child: _buildMetaItem('난이도', widget.problem.difficulty.isNotEmpty ? widget.problem.difficulty : '미정', Icons.stars),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -1580,6 +1584,8 @@ class _ProblemDetailScreenState extends State<ProblemDetailScreen> with SingleTi
         Flexible(
           child: Text(
             value,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
             style: const TextStyle(
               fontFamily: 'Paperlogy',
               fontSize: 14,
