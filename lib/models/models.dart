@@ -197,11 +197,21 @@ class User {
   final String id;
   final String nickname;
   final String schoolName;
+  final bool termsAgreed;           // 서비스 이용약관 동의 여부
+  final bool privacyAgreed;         // 개인정보처리방침 동의 여부
+  final DateTime? termsAgreedAt;    // 약관 동의 일시
+  final String? termsVersion;       // 동의한 약관 버전
+  final String? privacyVersion;     // 동의한 개인정보처리방침 버전
 
   User({
     required this.id,
     required this.nickname,
     required this.schoolName,
+    this.termsAgreed = false,
+    this.privacyAgreed = false,
+    this.termsAgreedAt,
+    this.termsVersion,
+    this.privacyVersion,
   });
 
   factory User.fromMap(Map<String, dynamic> map) {
@@ -209,6 +219,13 @@ class User {
       id: map['id'],
       nickname: map['nickname'],
       schoolName: map['schoolName'],
+      termsAgreed: map['termsAgreed'] ?? false,
+      privacyAgreed: map['privacyAgreed'] ?? false,
+      termsAgreedAt: map['termsAgreedAt'] != null
+          ? DateTime.parse(map['termsAgreedAt'])
+          : null,
+      termsVersion: map['termsVersion'],
+      privacyVersion: map['privacyVersion'],
     );
   }
 
@@ -217,6 +234,11 @@ class User {
       'id': id,
       'nickname': nickname,
       'schoolName': schoolName,
+      'termsAgreed': termsAgreed,
+      'privacyAgreed': privacyAgreed,
+      'termsAgreedAt': termsAgreedAt?.toIso8601String(),
+      'termsVersion': termsVersion,
+      'privacyVersion': privacyVersion,
     };
   }
 }

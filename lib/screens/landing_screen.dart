@@ -4,6 +4,7 @@ import 'package:world_math/services/firestore_service.dart';
 import 'package:world_math/theme.dart';
 import 'login_screen.dart'; // Will serve as Profile Setup
 import 'main_screen.dart';
+import 'terms_agreement_screen.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -71,18 +72,42 @@ class _LandingScreenState extends State<LandingScreen> with SingleTickerProvider
       final userDoc = await _firestoreService.getUser(uid);
       if (!mounted) return;
 
-      if (userDoc != null && userDoc.schoolName.isNotEmpty) {
-        // Profile complete
+      // 디버깅 로그
+      print('=== 약관 동의 확인 ===');
+      print('userDoc: ${userDoc != null ? "존재" : "null"}');
+      if (userDoc != null) {
+        print('termsAgreed: ${userDoc.termsAgreed}');
+        print('privacyAgreed: ${userDoc.privacyAgreed}');
+        print('schoolName: ${userDoc.schoolName}');
+      }
+
+      // 신규 사용자 또는 약관 미동의
+      if (userDoc == null ||
+          userDoc.termsAgreed != true ||
+          userDoc.privacyAgreed != true) {
+        print('→ TermsAgreementScreen으로 이동');
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainScreen()),
+          MaterialPageRoute(builder: (_) => const TermsAgreementScreen()),
         );
-      } else {
-        // Profile incomplete
+        return;
+      }
+
+      // 약관 동의 완료, 프로필 미완성
+      if (userDoc.schoolName.isEmpty) {
+        print('→ LoginScreen으로 이동');
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
+        return;
       }
+
+      // 모든 프로필 완성
+      print('→ MainScreen으로 이동');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
     } catch (e) {
+      print('프로필 확인 중 에러: $e');
       // Error checking profile, maybe stay here or go to login?
       // If error, assume profile incomplete or just let them stay to try again
       setState(() => _isLoading = false);
