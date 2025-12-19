@@ -266,6 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         final isLocked = problem.date.isAfter(now) &&
                             !isSameDay(problem.date, now);
                         final isSolved = _solvedIds.contains(problem.id);
+                        final isHoliday = problem.date.weekday == 6 || problem.date.weekday == 7; // 토요일(6) 또는 일요일(7)
                         final weekDays = ['월', '화', '수', '목', '금', '토', '일'];
                         final koreanDay =
                             weekDays[problem.date.weekday - 1];
@@ -299,11 +300,15 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                                         ? Colors.grey
                                         : (isSolved
                                             ? AppTheme.primaryColor
-                                            : Colors.white),
+                                            : (isHoliday
+                                                ? Colors.red[50]
+                                                : Colors.white)),
                                     border: Border.all(
                                       color: isLocked
                                           ? Colors.grey
-                                          : AppTheme.primaryColor,
+                                          : (isHoliday
+                                              ? Colors.red[300]!
+                                              : AppTheme.primaryColor),
                                       width: 2,
                                     ),
                                   ),
@@ -315,15 +320,25 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                                             ? const Icon(Icons.check,
                                                 size: 20,
                                                 color: Colors.white)
-                                            : Text(
-                                                koreanDay,
-                                                style: const TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.bold,
-                                                  color:
-                                                      AppTheme.primaryColor,
-                                                ),
-                                              )),
+                                            : (isHoliday
+                                                ? Text(
+                                                    '휴',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                      color: Colors.red[400],
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    koreanDay,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          AppTheme.primaryColor,
+                                                    ),
+                                                  ))),
                                   ),
                                 ),
                               ),
